@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 abstract class SocketInterface {
-  void handler();
+  void handler(Uint8List data);
 }
