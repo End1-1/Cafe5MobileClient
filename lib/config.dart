@@ -1,5 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+const key_server_address = "key_server_address";
+const key_server_port = "key_server_port";
+const key_server_username = "key_server_username";
+const key_server_password = "key_server_password";
+
 class Config {
 
   static late Config _config;

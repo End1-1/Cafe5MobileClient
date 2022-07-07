@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Config.init();
-  ClientSocket.init("10.1.0.2", 10002);
+  ClientSocket.init("195.191.155.164", 10002);
   runApp(const MyApp());
 }
 
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: const WidgetChooseSettings(),
+      home: WidgetChooseSettings(),
     );
   }
 }
