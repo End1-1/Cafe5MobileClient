@@ -1,7 +1,10 @@
 import 'dart:typed_data';
+import 'package:cafe5_mobile_client/translator.dart';
 import 'package:flutter/cupertino.dart';
 import 'client_socket_interface.dart';
 import 'client_socket.dart';
+import 'package:flutter/material.dart';
+import 'package:cafe5_mobile_client/widget_choose_settings.dart';
 
 abstract class BaseWidgetState <T extends StatefulWidget> extends State<T> implements SocketInterface {
 
@@ -12,8 +15,14 @@ abstract class BaseWidgetState <T extends StatefulWidget> extends State<T> imple
   }
 
   @override
+  void dispose() {
+    ClientSocket.socket.removeInterface(this);
+    super.dispose();
+  }
+
+  @override
   void authenticate() {
-    // TODO: implement authenticate
+    setState((){});
   }
 
   @override
@@ -23,7 +32,7 @@ abstract class BaseWidgetState <T extends StatefulWidget> extends State<T> imple
 
   @override
   void disconnected() {
-    setState((){});
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetChooseSettings()), (route) => false);
   }
 
   @override
@@ -35,5 +44,32 @@ abstract class BaseWidgetState <T extends StatefulWidget> extends State<T> imple
   Widget build(BuildContext context) {
     // TODO: implement build
     throw UnimplementedError();
+  }
+
+  Future<void> sd(String msg) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(tr('Tasks')),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                Text(msg),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text(tr("Ok")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

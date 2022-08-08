@@ -4,6 +4,15 @@ const key_server_address = "key_server_address";
 const key_server_port = "key_server_port";
 const key_server_username = "key_server_username";
 const key_server_password = "key_server_password";
+const key_database_name = "key_database_name";
+
+List<String> dbCreate = [
+  "create table products (id int primary key, name text)",
+  "create table employes (id int primary key, group_id int, name text)",
+  "create table processes (id int primary key, name text)",
+  "create table storages (id int primary key, name text)"
+];
+
 
 class Config {
 
@@ -23,7 +32,7 @@ class Config {
   }
 
   static String getString(String key) {
-    return _config._preferences.getString(key)!;
+    return _config._preferences.getString(key) ?? "";
   }
 
   static void setInt(String key, int value) {
