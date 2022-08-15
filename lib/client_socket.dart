@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:cafe5_mobile_client/client_socket_interface.dart';
 import 'package:cafe5_mobile_client/config.dart';
@@ -30,13 +31,36 @@ class ClientSocket {
       _socket!.listen((data) {
         _tempBuffer.add(data);
         //print(data);
-        int expectedSize = SocketMessage.calculateDataSize(_tempBuffer);
-        if (expectedSize == _tempBuffer.length - 17) {
-          for (SocketInterface s in _interfaces) {
-            s.handler(_tempBuffer.toBytes());
+        int expectedSize = 0;
+        do {
+           expectedSize = SocketMessage.calculateDataSize(_tempBuffer);
+          if (expectedSize <= _tempBuffer.length - 17) {
+            print(_tempBuffer.length);
+            for (SocketInterface s in _interfaces) {
+              try {
+                s.handler(_tempBuffer.toBytes().sublist(0, expectedSize + 17));
+              } catch (e) {
+                print(e.toString());
+              }
+            }
+            BytesBuilder bb = BytesBuilder();
+            bb.add(_tempBuffer.toBytes().sublist(expectedSize + 17, _tempBuffer
+                .toBytes()
+                .length));
+            _tempBuffer.clear();
+            if (bb.length > 0) {
+              _tempBuffer.add(bb.toBytes());
+              expectedSize = SocketMessage.calculateDataSize(_tempBuffer);
+              if (expectedSize > _tempBuffer.length - 17) {
+                expectedSize = 0;
+              }
+            } else {
+              expectedSize = 0;
+            }
+          } else {
+            break;
           }
-          _tempBuffer.clear();
-        }
+        } while (expectedSize != 0);
       }, onDone: () {
         setSocketState(0);
         print("Socket disconnected");

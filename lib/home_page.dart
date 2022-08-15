@@ -8,6 +8,7 @@ import 'package:cafe5_mobile_client/socket_message.dart';
 import 'package:cafe5_mobile_client/translator.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/db.dart';
+import 'package:cafe5_mobile_client/workshops.dart';
 import 'package:flutter/material.dart';
 
 import 'client_socket.dart';
@@ -20,9 +21,9 @@ class WidgetHome extends StatefulWidget {
 }
 
 class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
-
   bool _dataLoading = false;
   bool _dataError = false;
+  bool _allDataLoaded = false;
   NetworkTable _networkTable = NetworkTable();
   late String _dataErrorString;
   late AnimationController animationController;
@@ -33,15 +34,12 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
       vsync: this,
       duration: Duration(seconds: 1),
     )..addListener(() {
-      setState(() {
-
+        setState(() {});
       });
-    });
     animationController.repeat(reverse: false);
     loadTasks();
     super.initState();
   }
-
 
   @override
   void dispose() {
@@ -57,13 +55,13 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     int dllok = m.getByte();
     switch (dllok) {
       case 0:
-        setState((){
+        setState(() {
           _dataErrorString = "Required dll not found on server.";
           _dataError = true;
         });
         break;
       case 1:
-        setState((){
+        setState(() {
           _dataErrorString = "Required dll function not found on server.";
           _dataError = true;
         });
@@ -84,7 +82,9 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             _networkTable.readDataTypes(m);
             _networkTable.readData(m);
             _networkTable.readStrings(m);
-            setState((){});
+            setState(() {
+              _allDataLoaded = true;
+            });
             break;
           case SocketMessage.op_get_products:
             NetworkTable nt = NetworkTable();
@@ -143,6 +143,34 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
 
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("rwmftasks");
+            m.addInt(SocketMessage.op_get_workshop_list);
+            m.addString(Config.getString(key_database_name));
+            ClientSocket.send(m.data());
+            break;
+          case SocketMessage.op_get_workshop_list:
+            NetworkTable nt = NetworkTable();
+            nt.readFromSocketMessage(m);
+            Db.delete("delete from workshop");
+            for (int i = 0; i < nt.rowCount; i++) {
+              Db.insert("insert into workshop (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
+            }
+
+            m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+            m.addString("rwmftasks");
+            m.addInt(SocketMessage.op_get_stages);
+            m.addString(Config.getString(key_database_name));
+            ClientSocket.send(m.data());
+            break;
+          case SocketMessage.op_get_stages:
+            NetworkTable nt = NetworkTable();
+            nt.readFromSocketMessage(m);
+            Db.delete("delete from stages");
+            for (int i = 0; i < nt.rowCount; i++) {
+              Db.insert("insert into stages (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
+            }
+
+            m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+            m.addString("rwmftasks");
             m.addInt(SocketMessage.op_get_employes);
             m.addString(Config.getString(key_database_name));
             ClientSocket.send(m.data());
@@ -156,143 +184,135 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-         child: Column(
-            //mainAxisAlignment: MainAxisAlignment.center,
-           mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container (
-                color: Colors.yellow,
-                child: Align(
+            child: Column(
+                //mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+          Container(
+              color: Colors.yellow,
+              child: Align(
                   alignment: Alignment.center,
                   child: Container(
-                  margin: EdgeInsets.only(top: 20, bottom: 20),
-                  child: Text("ELINA", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),)
-                  )
-                  )
-
-                ), Container (
-                    color: Colors.green,
-                      child : Row(
-                        children: [
-                          Expanded(child: Align(
-                            alignment: Alignment.center,
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: 0)));
-                              },
-                              child: Text(tr("New task")),
-                            ),
-                          )
-                          ),
-                          Expanded(child: Align(
-                            alignment: Alignment.center,
-                            child: TextButton(
-                              onPressed: () {
-                                if (_networkTable.selectedIndex < 0) {
-                                  sd(tr("Select task"));
-                                  return;
-                                }
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: _networkTable.getRawData(_networkTable.selectedIndex, 0))));
-                              },
-                              child: Text(tr("Edit task")),
-                            ),
-                          )
-                          )
-                        ],
-                      )
-                  ),
-              Container (
+                      margin: EdgeInsets.only(top: 20, bottom: 20),
+                      child: Text(
+                        "ELINA",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      )))),
+          Visibility(
+              visible: _allDataLoaded,
+              child: Container(
                   color: Colors.green,
-                  child : Align(
-                    alignment: Alignment.center,
-                    child: TextButton(
-                      onPressed: () {
-                        sd("Error in create store document");
-                      },
-                      child: Text(tr("New store document")),
-                    ),
-                  )
-              ),
-              Container (
-                  color: Colors.green,
-                  child : Align(
-                    alignment: Alignment.center,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => Storage()));
-                      },
-                      child: Text(tr("Material in the store")),
-                    ),
-                  )
-              ),
-              Container (
-                  color: Colors.black12,
-                  child : Align(
-                    alignment: Alignment.center,
-                      child: Text(tr("Current tasks")),
-                    ),
-              ),
-              Flexible(
-                flex: 1,
-                  child: _dataLoading ? _mainIndicator() : (_dataError ? _errorBody() : _mainBody())
-                )
-            ]
-        )
-        )
-    );
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: Align(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: 0)));
+                          },
+                          child: Text(tr("New task")),
+                        ),
+                      )),
+                      Expanded(
+                          child: Align(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () {
+                            if (_networkTable.selectedIndex < 0) {
+                              sd(tr("Select task"));
+                              return;
+                            }
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: _networkTable.getRawData(_networkTable.selectedIndex, 0))));
+                          },
+                          child: Text(tr("Edit task")),
+                        ),
+                      )),
+                      Expanded(
+                          child: Align(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => TheWorkshops()));
+                          },
+                          child: Text(tr("Workshops")),
+                        ),
+                      ))
+                    ],
+                  ))),
+          // Container (
+          //     color: Colors.green,
+          //     child : Align(
+          //       alignment: Alignment.center,
+          //       child: TextButton(
+          //         onPressed: () {
+          //           sd("Error in create store document");
+          //         },
+          //         child: Text(tr("New store document")),
+          //       ),
+          //     )
+          // ),
+          // Container (
+          //     color: Colors.green,
+          //     child : Align(
+          //       alignment: Alignment.center,
+          //       child: TextButton(
+          //         onPressed: () {
+          //           Navigator.push(context, MaterialPageRoute(builder: (context) => Storage()));
+          //         },
+          //         child: Text(tr("Material in the store")),
+          //       ),
+          //     )
+          // ),
+          Container(
+            color: Colors.black12,
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(tr("Current tasks")),
+            ),
+          ),
+          Flexible(flex: 1, child: _dataLoading ? _mainIndicator() : (_dataError ? _errorBody() : _mainBody()))
+        ])));
   }
 
   Widget _mainIndicator() {
     return Align(
-      alignment: Alignment.center,
-      child: CircularProgressIndicator (
-        value: animationController.value,
-      )
-    );
+        alignment: Alignment.center,
+        child: CircularProgressIndicator(
+          value: animationController.value,
+        ));
   }
 
   Widget _errorBody() {
-    return Align(
-        child: TextButton (
-            onPressed: loadTasks,
-            child: Text(_dataErrorString + "\r\n" + tr("Error loading tasks. Click to try again."))
-        )
-    );
+    return Align(child: TextButton(onPressed: loadTasks, child: Text(_dataErrorString + "\r\n" + tr("Error loading tasks. Click to try again."))));
   }
 
   Widget _mainBody() {
     if (_networkTable.isEmpty()) {
       return Text(tr("No data"));
     }
-    Map<int, double> colsWidths = {
-      0:0, 1: 90, 2: 100, 3: 50, 4:50
-    };
+    Map<int, double> colsWidths = {0: 0, 1: 90, 2: 100, 3: 50, 4: 50};
     List<DataColumn> cols = [];
     for (int i = 0; i < _networkTable.columnCount; i++) {
-      DataColumn dataCol = DataColumn(
-          label: Container(
-            width: colsWidths[i],
-              child: Text(_networkTable.columnName(i)))
-      );
+      DataColumn dataCol = DataColumn(label: Container(width: colsWidths[i], child: Text(_networkTable.columnName(i))));
       cols.add(dataCol);
     }
     List<DataRow> rows = [];
     for (int i = 0; i < _networkTable.rowCount; i++) {
       List<DataCell> cells = [];
       for (int c = 0; c < _networkTable.columnCount; c++) {
-        DataCell cell = DataCell(Container(width: colsWidths[c], child:Text(_networkTable.getDisplayData(i, c))));
+        DataCell cell = DataCell(Container(width: colsWidths[c], child: Text(_networkTable.getDisplayData(i, c))));
         cells.add(cell);
       }
       DataRow dr = DataRow(
-        cells: cells,
-        selected: i == _networkTable.selectedIndex,
-        onSelectChanged:(val) {
-          setState(() {
-            _networkTable.selectedIndex = val! ? i : -1;
+          cells: cells,
+          selected: i == _networkTable.selectedIndex,
+          onSelectChanged: (val) {
+            setState(() {
+              _networkTable.selectedIndex = val! ? i : -1;
+            });
           });
-        }
-      );
       rows.add(dr);
     }
     DataTable dt = DataTable(
@@ -302,7 +322,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     );
 
     return SingleChildScrollView(
-      child: SingleChildScrollView (
+      child: SingleChildScrollView(
         child: dt,
         scrollDirection: Axis.horizontal,
       ),
@@ -325,7 +345,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     return Colors.transparent;
   }
 
-  void loadTasks () async {
+  void loadTasks() async {
     setState(() {
       _dataErrorString = "Unknown error";
       _dataError = false;

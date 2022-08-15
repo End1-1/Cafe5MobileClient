@@ -10,7 +10,9 @@ List<String> dbCreate = [
   "create table products (id int primary key, name text)",
   "create table employes (id int primary key, group_id int, name text)",
   "create table processes (id int primary key, name text)",
-  "create table storages (id int primary key, name text)"
+  "create table storages (id int primary key, name text)",
+  "create table workshop (id int primary key, name text)",
+  "create table stages (id int primary key, name text)"
 ];
 
 

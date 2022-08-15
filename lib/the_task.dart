@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cafe5_mobile_client/base_widget.dart';
+import 'package:cafe5_mobile_client/class_workshop.dart';
 import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
@@ -12,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import 'class_product.dart';
+import 'class_stages.dart';
 import 'client_socket.dart';
 import 'config.dart';
 
@@ -28,9 +30,13 @@ class TheTask extends StatefulWidget {
 
 class TheTaskState extends BaseWidgetState<TheTask> {
   List<Product> products = [];
+  List<ClassWorkshop> workshop = [];
+  List<ClassStage> stages = [];
   late TextEditingController _productQtyTextController;
   NetworkTable _processTable = new NetworkTable();
   Product? _product;
+  ClassWorkshop? _workshop;
+  ClassStage? _stage;
   String _dateCreated = DateFormat('dd/MM/yyyy').format(DateTime.now());
   String _timeCreated = DateFormat('HH:mm').format(DateTime.now());
   bool _dataLoading = false;
@@ -66,11 +72,23 @@ class TheTaskState extends BaseWidgetState<TheTask> {
               _timeCreated = m.getString();
               _productQtyTextController.text = m.getDouble().toString();
               _product = Product(id: 0, name: m.getString());
+              _workshop = _workshopById(m.getInt());
+              _stage = _stageById(m.getInt());
               int processok = m.getByte();
               if (processok == 0) {
                 return;
               }
               _processTable.readFromSocketMessage(m);
+            });
+            break;
+          case SocketMessage.op_set_workshop:
+            setState(() {
+              _workshop = _workshopById(m.getInt());
+            });
+            break;
+          case SocketMessage.op_set_state:
+            setState(() {
+              _stage = _stageById(m.getInt());
             });
             break;
         }
@@ -81,17 +99,29 @@ class TheTaskState extends BaseWidgetState<TheTask> {
   @override
   void initState() {
     _productQtyTextController = TextEditingController();
-    if (widget.taskId == 0) {
-      Db.query('products').then((map) {
-        List.generate(map.length, (i) {
-          Product p = Product(id: map[i]['id'], name: map[i]["name"]);
-          products.add(p);
-        });
+    Db.query('workshop').then((map) {
+      List.generate(map.length, (i) {
+        ClassWorkshop p = ClassWorkshop(id: map[i]['id'], name: map[i]["name"]);
+        workshop.add(p);
       });
-    } else {
-      _product = Product(id: 0, name: "...");
-      _loadTask(widget.taskId);
-    }
+      Db.query('stages').then((map) {
+        List.generate(map.length, (i) {
+          ClassStage p = ClassStage(id: map[i]['id'], name: map[i]["name"]);
+          stages.add(p);
+        });
+        if (widget.taskId == 0) {
+          Db.query('products').then((map) {
+            List.generate(map.length, (i) {
+              Product p = Product(id: map[i]['id'], name: map[i]["name"]);
+              products.add(p);
+            });
+          });
+        } else {
+          _product = Product(id: 0, name: "...");
+          _loadTask(widget.taskId);
+        }
+      });
+    });
     super.initState();
   }
 
@@ -102,10 +132,14 @@ class TheTaskState extends BaseWidgetState<TheTask> {
             child: Column(
       children: [
         Container(
-            margin: EdgeInsets.all(10),
+            margin: EdgeInsets.all(5),
             child: Row(children: [
               Text(
-                widget.taskId == 0 ? tr("New task") : _product!.name,
+                widget.taskId == 0
+                    ? tr("New task")
+                    : _product == null
+                        ? "..."
+                        : _product!.name,
                 style: TextStyle(fontSize: 22),
               ),
               Expanded(child: Container()),
@@ -116,15 +150,10 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                           displayStringForOption: (option) => option.name,
                           optionsBuilder: (TextEditingValue t) {
                             return products.where((Product p) {
-                              return p.name
-                                  .toLowerCase()
-                                  .startsWith(t.text.toLowerCase());
+                              return p.name.toLowerCase().startsWith(t.text.toLowerCase());
                             }).toList();
                           },
-                          fieldViewBuilder: (BuildContext context,
-                              TextEditingController fieldTextEditingController,
-                              FocusNode fieldFocusNode,
-                              VoidCallback onFieldSubmitted) {
+                          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
                             return TextField(
                               controller: fieldTextEditingController,
                               focusNode: fieldFocusNode,
@@ -137,7 +166,57 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                       : Text(""))
             ])),
         Container(
-            margin: EdgeInsets.all(10),
+            margin: EdgeInsets.all(5),
+            child: Row(children: [
+              Text(
+                tr("Workshop"),
+                style: TextStyle(fontSize: 22),
+              ),
+              Expanded(child: Container()),
+              Container(
+                  width: 150,
+                  child: Autocomplete<ClassWorkshop>(
+                    displayStringForOption: (option) => option.name,
+                    optionsBuilder: (TextEditingValue t) {
+                      return workshop.where((ClassWorkshop p) {
+                        return p.name.toLowerCase().startsWith(t.text.toLowerCase());
+                      }).toList();
+                    },
+                    fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+                      return TextFormField(
+                        controller: fieldTextEditingController..text = (_workshop == null ? "" : _workshop?.name)!,
+                        focusNode: fieldFocusNode,
+                      );
+                    },
+                    onSelected: (ClassWorkshop p) {
+                      if (widget.taskId > 0) {
+                        sq(tr("Change workshop?"), () {
+                          SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+                          m.addString("rwmftasks");
+                          m.addInt(SocketMessage.op_set_workshop);
+                          m.addString(Config.getString(key_database_name));
+                          m.addInt(widget.taskId);
+                          m.addInt(p.id);
+                          ClientSocket.send(m.data());
+                        }, () {});
+                      } else {
+                        _workshop = p;
+                      }
+                    },
+                  ))
+            ])),
+        Container(
+            margin: EdgeInsets.all(5),
+            child: Row(children: [
+              Text(
+                tr("Stage"),
+                style: TextStyle(fontSize: 22),
+              ),
+              Expanded(child: Container()),
+              Container(width: 150, child: Text(_stage == null ? "?" : _stage!.name, style: TextStyle(fontSize: 18)))
+            ])),
+        Container(
+            margin: EdgeInsets.all(5),
             child: Row(
               children: [
                 Text(tr("Date created")),
@@ -147,8 +226,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                 ),
                 Expanded(child: Container()),
                 Text(tr("Time created")),
-                Container(
-                    margin: EdgeInsets.only(left: 5), child: Text(_timeCreated))
+                Container(margin: EdgeInsets.only(left: 5), child: Text(_timeCreated))
               ],
             )),
         Container(
@@ -156,35 +234,27 @@ class TheTaskState extends BaseWidgetState<TheTask> {
             child: Row(
               children: [
                 Text(tr("Total qty")),
-                Container(
-                    margin: EdgeInsets.only(left: 5),
-                    width: 100,
-                    child: TextFormField(
-                        readOnly: widget.taskId > 0,
-                        keyboardType: TextInputType.number,
-                        controller: _productQtyTextController,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
-                        ])),
+                Container(margin: EdgeInsets.only(left: 5), width: 100, child: TextFormField(readOnly: widget.taskId > 0, keyboardType: TextInputType.number, controller: _productQtyTextController, inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly])),
                 Expanded(child: Container()),
                 widget.taskId == 0
-                    ? TextButton(
-                        onPressed: _createTask, child: Text(tr("Create")))
-                    : TextButton(
-                        child: Text(tr("Execute")), onPressed: _executeProcess),
+                    ? TextButton(onPressed: _createTask, child: Text(tr("Create")))
+                    : Row(
+                        children: [
+                          TextButton(child: Text(tr("Activate state")), onPressed: _activateState),
+                          TextButton(child: Text(tr("Execute")), onPressed: _executeProcess),
+                        ],
+                      )
               ],
             )),
-        LinearPercentIndicator( //leaner progress bar
+        LinearPercentIndicator(
+          //leaner progress bar
           animation: true,
           animationDuration: 1000,
           lineHeight: 20.0,
           percent: 0.3,
           center: Text(
             "30%",
-            style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w600,
-                color: Colors.black),
+            style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w600, color: Colors.black),
           ),
           linearStrokeCap: LinearStrokeCap.roundAll,
           progressColor: Colors.blue[400],
@@ -202,25 +272,17 @@ class TheTaskState extends BaseWidgetState<TheTask> {
     if (_processTable.isEmpty()) {
       return Text(tr("Empty process"));
     }
-    Map<int, double> colw = {0: 0, 1: 200, 2: 0, 3: 0, 4: 50, 5: 50};
+    Map<int, double> colw = {0: 0, 1: 100, 2: 200, 3: 0, 4: 50, 5: 50, 6: 50};
     List<DataColumn> columns = [];
     for (int i = 0; i < _processTable.columnCount; i++) {
-      DataColumn dataColumn = DataColumn(
-          label: colw[i] == 0
-              ? Container()
-              : Container(
-                  width: colw[i], child: Text(_processTable.columnName(i))));
+      DataColumn dataColumn = DataColumn(label: colw[i] == 0 ? Container() : Container(width: colw[i], child: Text(_processTable.columnName(i))));
       columns.add(dataColumn);
     }
     List<DataRow> rows = [];
     for (int i = 0; i < _processTable.rowCount; i++) {
       List<DataCell> cells = [];
       for (int c = 0; c < _processTable.columnCount; c++) {
-        DataCell dc = DataCell(colw[c] == 0
-            ? Container()
-            : Container(
-                width: colw[c],
-                child: Text(_processTable.getDisplayData(i, c))));
+        DataCell dc = DataCell(colw[c] == 0 ? Container() : Container(width: colw[c], child: Text(_processTable.getDisplayData(i, c))));
         cells.add(dc);
       }
       DataRow dr = DataRow(
@@ -238,10 +300,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
       rows: rows,
       dataRowColor: MaterialStateProperty.resolveWith(_getDataRowColor),
     );
-    return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child:
-            SingleChildScrollView(scrollDirection: Axis.vertical, child: dt));
+    return SingleChildScrollView(scrollDirection: Axis.horizontal, child: SingleChildScrollView(scrollDirection: Axis.vertical, child: dt));
   }
 
   Color _getDataRowColor(Set<MaterialState> states) {
@@ -264,19 +323,27 @@ class TheTaskState extends BaseWidgetState<TheTask> {
       sd(tr("Product is not selected"));
       return;
     }
+    if (_workshop == null) {
+      sd(tr("Workshop is not selected"));
+      return;
+    }
+    if (_stage == null) {
+      sd(tr("Stage is not selected"));
+      return;
+    }
     double? qty = double.tryParse(_productQtyTextController.text);
     if (qty == null || qty < 0.1) {
       sd(tr("Input right quantity"));
       return;
     }
-    SocketMessage m = SocketMessage(
-        messageId: SocketMessage.messageNumber(),
-        command: SocketMessage.c_dllop);
+    SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
     m.addString("rwmftasks");
     m.addInt(SocketMessage.op_create_task);
     m.addString(Config.getString(key_database_name));
     m.addInt(_product!.id);
     m.addDouble(qty);
+    m.addInt(_workshop!.id);
+    m.addInt(_stage!.id);
     ClientSocket.send(m.data());
   }
 
@@ -284,14 +351,28 @@ class TheTaskState extends BaseWidgetState<TheTask> {
     setState(() {
       _dataLoading = true;
     });
-    SocketMessage m = SocketMessage(
-        messageId: SocketMessage.messageNumber(),
-        command: SocketMessage.c_dllop);
+    SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
     m.addString("rwmftasks");
     m.addInt(SocketMessage.op_load_task);
     m.addString(Config.getString(key_database_name));
     m.addInt(id);
     ClientSocket.send(m.data());
+  }
+
+  void _activateState() {
+    if (_processTable.selectedIndex < 0) {
+      sd(tr("Nothing selected"));
+      return;
+    }
+    sq(tr("Change current state?"), () {
+      SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+      m.addString("rwmftasks");
+      m.addInt(SocketMessage.op_set_state);
+      m.addString(Config.getString(key_database_name));
+      m.addInt(widget.taskId);
+      m.addInt(_processTable.getRawData(_processTable.selectedIndex, 0));
+      ClientSocket.send(m.data());
+    }, () {});
   }
 
   void _executeProcess() {
@@ -302,13 +383,25 @@ class TheTaskState extends BaseWidgetState<TheTask> {
     Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => TheTaskProcess(
-              taskId: widget.taskId,
-              processId:
-                  _processTable.getRawData(_processTable.selectedIndex, 0),
-              processName:
-                  _processTable.getRawData(_processTable.selectedIndex, 1),
-              price: _processTable.getRawData(_processTable.selectedIndex, 3)),
+          builder: (context) => TheTaskProcess(taskId: widget.taskId, processId: _processTable.getRawData(_processTable.selectedIndex, 0), processName: _processTable.getRawData(_processTable.selectedIndex, 1), price: _processTable.getRawData(_processTable.selectedIndex, 3)),
         ));
+  }
+
+  ClassWorkshop? _workshopById(int id) {
+    for (ClassWorkshop w in workshop) {
+      if (w.id == id) {
+        return w;
+      }
+    }
+    return null;
+  }
+
+  ClassStage? _stageById(int id) {
+    for (ClassStage w in stages) {
+      if (w.id == id) {
+        return w;
+      }
+    }
+    return null;
   }
 }

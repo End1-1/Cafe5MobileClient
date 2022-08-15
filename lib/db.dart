@@ -13,7 +13,7 @@ class Db {
           }
         }, onUpgrade: (db, oldVersion, newVersion) {
           List<String> oldTable = [
-            "products", "employes", "processes", "storages"
+            "products", "employes", "processes", "storages", "workshop", "stages"
           ];
           for (String t in oldTable) {
             try {
@@ -25,7 +25,7 @@ class Db {
           for (String s in createList) {
             db.execute(s);
           }
-        }, version: 10)
+        }, version: 14)
             .then((value) => _db = value);
       });
     }
