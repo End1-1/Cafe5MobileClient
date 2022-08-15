@@ -99,30 +99,32 @@ class TheTaskState extends BaseWidgetState<TheTask> {
   @override
   void initState() {
     _productQtyTextController = TextEditingController();
-    Db.query('workshop').then((map) {
-      List.generate(map.length, (i) {
-        ClassWorkshop p = ClassWorkshop(id: map[i]['id'], name: map[i]["name"]);
-        workshop.add(p);
-      });
-      Db.query('stages').then((map) {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Db.query('workshop').then((map) {
         List.generate(map.length, (i) {
-          ClassStage p = ClassStage(id: map[i]['id'], name: map[i]["name"]);
-          stages.add(p);
+          ClassWorkshop p = ClassWorkshop(id: map[i]['id'], name: map[i]["name"]);
+          workshop.add(p);
         });
-        if (widget.taskId == 0) {
-          Db.query('products').then((map) {
-            List.generate(map.length, (i) {
-              Product p = Product(id: map[i]['id'], name: map[i]["name"]);
-              products.add(p);
-            });
+        Db.query('stages').then((map) {
+          List.generate(map.length, (i) {
+            ClassStage p = ClassStage(id: map[i]['id'], name: map[i]["name"]);
+            stages.add(p);
           });
-        } else {
-          _product = Product(id: 0, name: "...");
-          _loadTask(widget.taskId);
-        }
+          if (widget.taskId == 0) {
+            Db.query('products').then((map) {
+              List.generate(map.length, (i) {
+                Product p = Product(id: map[i]['id'], name: map[i]["name"]);
+                products.add(p);
+              });
+            });
+          } else {
+            _product = Product(id: 0, name: "...");
+            _loadTask(widget.taskId);
+          }
+        });
       });
     });
-    super.initState();
   }
 
   @override
@@ -383,7 +385,10 @@ class TheTaskState extends BaseWidgetState<TheTask> {
     Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => TheTaskProcess(taskId: widget.taskId, processId: _processTable.getRawData(_processTable.selectedIndex, 0), processName: _processTable.getRawData(_processTable.selectedIndex, 1), price: _processTable.getRawData(_processTable.selectedIndex, 3)),
+          builder: (context) => TheTaskProcess(taskId: widget.taskId,
+              processId: _processTable.getRawData(_processTable.selectedIndex, 0),
+              processName: _processTable.getRawData(_processTable.selectedIndex, 1),
+              price: double.tryParse(_processTable.getRawData(_processTable.selectedIndex, 3).toString())!),
         ));
   }
 

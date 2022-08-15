@@ -12,9 +12,7 @@ class Db {
             db.execute(s);
           }
         }, onUpgrade: (db, oldVersion, newVersion) {
-          List<String> oldTable = [
-            "products", "employes", "processes", "storages", "workshop", "stages"
-          ];
+          List<String> oldTable = ["products", "employes", "processes", "storages", "workshop", "stages"];
           for (String t in oldTable) {
             try {
               db.execute("drop table $t");
@@ -41,6 +39,6 @@ class Db {
   }
 
   static Future<List<Map<String, dynamic?>>> query(String table) async {
-    return _db!.query(table);
+    return await _db!.query(table);
   }
 }

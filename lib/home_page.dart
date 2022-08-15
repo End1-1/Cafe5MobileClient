@@ -150,6 +150,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           case SocketMessage.op_get_workshop_list:
             NetworkTable nt = NetworkTable();
             nt.readFromSocketMessage(m);
+
             Db.delete("delete from workshop");
             for (int i = 0; i < nt.rowCount; i++) {
               Db.insert("insert into workshop (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
