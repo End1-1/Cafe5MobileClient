@@ -21,11 +21,7 @@ class TheTaskProcess extends StatefulWidget {
   String processName;
   double price;
 
-  TheTaskProcess(
-      {required this.taskId,
-      required this.processId,
-      required this.processName,
-      required this.price});
+  TheTaskProcess({required this.taskId, required this.processId, required this.processName, required this.price});
 
   @override
   State<StatefulWidget> createState() {
@@ -70,8 +66,7 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
   void initState() {
     Db.query('employes').then((map) {
       List.generate(map.length, (i) {
-        Employee e = Employee(
-            id: map[i]['id'], group: map[i]['group_id'], name: map[i]["name"]);
+        Employee e = Employee(id: map[i]['id'], group: map[i]['group_id'], name: map[i]["name"]);
         _employes.add(e);
       });
     });
@@ -116,15 +111,10 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
                   displayStringForOption: (option) => option.name,
                   optionsBuilder: (TextEditingValue t) {
                     return _employes.where((Employee p) {
-                      return p.name
-                          .toLowerCase()
-                          .startsWith(t.text.toLowerCase());
+                      return p.name.toLowerCase().startsWith(t.text.toLowerCase());
                     }).toList();
                   },
-                  fieldViewBuilder: (BuildContext context,
-                      TextEditingController fieldTextEditingController,
-                      FocusNode fieldFocusNode,
-                      VoidCallback onFieldSubmitted) {
+                  fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
                     return TextField(
                       controller: fieldTextEditingController,
                       focusNode: fieldFocusNode,
@@ -143,9 +133,7 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
               style: TextStyle(fontSize: 18),
             ),
             Expanded(child: Container()),
-            Container(
-                width: 300,
-                child: Text(widget.processName, style: TextStyle(fontSize: 18)))
+            Container(width: 300, child: Text(widget.processName, style: TextStyle(fontSize: 18)))
           ],
         ),
         Row(
@@ -155,10 +143,7 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
               style: TextStyle(fontSize: 18),
             ),
             Expanded(child: Container()),
-            Container(
-                width: 300,
-                child: Text(widget.price.toString(), style: TextStyle(fontSize: 18))
-            )
+            Container(width: 300, child: Text(widget.price.toString(), style: TextStyle(fontSize: 18)))
           ],
         ),
         Row(
@@ -168,25 +153,22 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
               style: TextStyle(fontSize: 18),
             ),
             Expanded(child: Container()),
-            Container(
-                width: 200,
-                child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    controller: _processQtyTextController,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly
-                    ]))
+            Container(width: 200, child: TextFormField(keyboardType: TextInputType.number, controller: _processQtyTextController, inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]))
           ],
         ),
         Row(
           children: [
             Expanded(
-              child: Container (
-                child: Align(
-                  alignment: Alignment.center,
-                  child: TextButton(child: Text(tr("Save"), style: TextStyle(fontSize: 22),), onPressed: _save,)
-                )
-              ),
+              child: Container(
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        child: Text(
+                          tr("Save"),
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        onPressed: _save,
+                      ))),
             )
           ],
         )
@@ -205,9 +187,7 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
       return;
     }
 
-    SocketMessage m = SocketMessage(
-        messageId: SocketMessage.messageNumber(),
-        command: SocketMessage.c_dllop);
+    SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
     m.addString("rwmftasks");
     m.addInt(SocketMessage.op_save_process);
     m.addString(Config.getString(key_database_name));

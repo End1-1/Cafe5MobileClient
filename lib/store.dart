@@ -41,6 +41,7 @@ class StorageState extends BaseWidgetState<Storage> with TickerProviderStateMixi
             id: map[i]['id'], name: map[i]["name"]);
         _storages.add(e);
       });
+      animationController.stop();
     });
     super.initState();
   }

@@ -20,7 +20,7 @@ class WidgetHome extends StatefulWidget {
   }
 }
 
-class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
+class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, WidgetsBindingObserver {
   bool _dataLoading = false;
   bool _dataError = false;
   bool _allDataLoaded = false;
@@ -37,14 +37,28 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         setState(() {});
       });
     animationController.repeat(reverse: false);
-    loadTasks();
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    loadTasks();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // went to Background
+    }
+    if (state == AppLifecycleState.resumed) {
+      // came back to Foreground
+      loadTasks();
+    }
   }
 
   @override
   void dispose() {
     animationController.dispose();
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -203,45 +217,74 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           Visibility(
               visible: _allDataLoaded,
               child: Container(
-                  color: Colors.green,
+                  //color: Colors.green,
                   child: Row(
-                    children: [
-                      Expanded(
-                          child: Align(
-                        alignment: Alignment.center,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: 0)));
-                          },
-                          child: Text(tr("New task")),
+                children: [
+                  Expanded(
+                      child: Align(
+                    alignment: Alignment.center,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                        backgroundColor: Colors.blueGrey,
+                        side: BorderSide(
+                          width: 1.0,
+                          color: Colors.black38,
+                          style: BorderStyle.solid,
                         ),
-                      )),
-                      Expanded(
-                          child: Align(
-                        alignment: Alignment.center,
-                        child: TextButton(
-                          onPressed: () {
-                            if (_networkTable.selectedIndex < 0) {
-                              sd(tr("Select task"));
-                              return;
-                            }
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: _networkTable.getRawData(_networkTable.selectedIndex, 0))));
-                          },
-                          child: Text(tr("Edit task")),
+                      ),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: 0)));
+                      },
+                      child: Text(tr("New task"), style: TextStyle(color: Colors.white)),
+                    ),
+                  )),
+                  Expanded(
+                      child: Align(
+                    alignment: Alignment.center,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                        backgroundColor: Colors.blueGrey,
+                        side: BorderSide(
+                          width: 1.0,
+                          color: Colors.black38,
+                          style: BorderStyle.solid,
                         ),
-                      )),
-                      Expanded(
-                          child: Align(
-                        alignment: Alignment.center,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => TheWorkshops()));
-                          },
-                          child: Text(tr("Workshops")),
+                      ),
+                      onPressed: () {
+                        if (_networkTable.selectedIndex < 0) {
+                          sd(tr("Select task"));
+                          return;
+                        }
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: _networkTable.getRawData(_networkTable.selectedIndex, 0)))).then((value) {
+                          loadTasks();
+                        });
+                      },
+                      child: Text(tr("Edit task"), style: TextStyle(color: Colors.white)),
+                    ),
+                  )),
+                  Expanded(
+                      child: Align(
+                    alignment: Alignment.center,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                        backgroundColor: Colors.blueGrey,
+                        side: BorderSide(
+                          width: 1.0,
+                          color: Colors.black38,
+                          style: BorderStyle.solid,
                         ),
-                      ))
-                    ],
-                  ))),
+                      ),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => TheWorkshops()));
+                      },
+                      child: Text(tr("Workshops"), style: TextStyle(color: Colors.white)),
+                    ),
+                  ))
+                ],
+              ))),
           // Container (
           //     color: Colors.green,
           //     child : Align(

@@ -40,6 +40,15 @@ class TheTaskState extends BaseWidgetState<TheTask> {
   String _dateCreated = DateFormat('dd/MM/yyyy').format(DateTime.now());
   String _timeCreated = DateFormat('HH:mm').format(DateTime.now());
   bool _dataLoading = false;
+  double _totalpercent = 0.0;
+
+  TextEditingController _autoTextEditingController1 = TextEditingController();
+  FocusNode _autoFocus1 = FocusNode();
+  GlobalKey _autoKey1 = GlobalKey();
+
+  TextEditingController _autoTextEditingController2 = TextEditingController();
+  FocusNode _autoFocus2= FocusNode();
+  GlobalKey _autoKey2 = GlobalKey();
 
   @override
   void handler(Uint8List data) {
@@ -79,6 +88,12 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                 return;
               }
               _processTable.readFromSocketMessage(m);
+              double d1 = 0, d2 = 0;
+              for (int i = 0; i < _processTable.rowCount; i++) {
+                d1 += _processTable.getRawData(i, 3);
+                d2 += _processTable.getRawData(i, 4);
+              }
+              _totalpercent = 100 * (d2 / d1);
             });
             break;
           case SocketMessage.op_set_workshop:
@@ -134,25 +149,29 @@ class TheTaskState extends BaseWidgetState<TheTask> {
             child: Column(
       children: [
         Container(
-            margin: EdgeInsets.all(5),
+          color: Colors.black12,
+            padding: EdgeInsets.all(5),
             child: Row(children: [
               Text(
                 widget.taskId == 0
                     ? tr("New task")
-                    : _product == null
+                    :  _product == null
                         ? "..."
                         : _product!.name,
-                style: TextStyle(fontSize: 22),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               Expanded(child: Container()),
               Container(
-                  width: 150,
+                  width: 300,
                   child: widget.taskId == 0
-                      ? Autocomplete<Product>(
+                      ? RawAutocomplete<Product>(
+                          textEditingController: _autoTextEditingController1,
+                          key: _autoKey1,
+                          focusNode: _autoFocus1,
                           displayStringForOption: (option) => option.name,
                           optionsBuilder: (TextEditingValue t) {
                             return products.where((Product p) {
-                              return p.name.toLowerCase().startsWith(t.text.toLowerCase());
+                              return p.name.toLowerCase().contains(t.text.toLowerCase());
                             }).toList();
                           },
                           fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
@@ -161,14 +180,39 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                               focusNode: fieldFocusNode,
                             );
                           },
+                      optionsViewBuilder: (BuildContext context,
+                          AutocompleteOnSelected<Product> onSelected,
+                          Iterable<Product> options
+                          ) {
+                        return Align(
+                            alignment: Alignment.topLeft,
+                            child: Material(
+                              child: Container(
+                                  width: 300,
+                                  height: 400,
+                                  child: ListView.builder(
+                                      itemCount: options.length,
+                                      itemBuilder: (BuildContext context, int i) {
+                                        final Product w = options.elementAt(i);
+                                        return GestureDetector(
+                                            onTap: (){
+                                              onSelected(w);
+                                            },
+                                            child: ListTile(title: Text(w.name))
+                                        );
+                                      })
+                              ),
+                            ));
+                      },
                           onSelected: (Product p) {
                             _product = p;
                           },
                         )
-                      : Text(""))
+                      : Text("")),
             ])),
+
         Container(
-            margin: EdgeInsets.all(5),
+            padding: EdgeInsets.all(5),
             child: Row(children: [
               Text(
                 tr("Workshop"),
@@ -177,7 +221,10 @@ class TheTaskState extends BaseWidgetState<TheTask> {
               Expanded(child: Container()),
               Container(
                   width: 150,
-                  child: Autocomplete<ClassWorkshop>(
+                  child: RawAutocomplete<ClassWorkshop>(
+                    textEditingController: _autoTextEditingController2,
+                    key: _autoKey2,
+                    focusNode: _autoFocus2,
                     displayStringForOption: (option) => option.name,
                     optionsBuilder: (TextEditingValue t) {
                       return workshop.where((ClassWorkshop p) {
@@ -190,6 +237,30 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                         focusNode: fieldFocusNode,
                       );
                     },
+                      optionsViewBuilder: (BuildContext context,
+                          AutocompleteOnSelected<ClassWorkshop> onSelected,
+                          Iterable<ClassWorkshop> options
+                          ) {
+                        return Align(
+                            alignment: Alignment.topLeft,
+                            child: Material(
+                              child: Container(
+                                  width: 300,
+                                  height: 400,
+                                  child: ListView.builder(
+                                      itemCount: options.length,
+                                      itemBuilder: (BuildContext context, int i) {
+                                        final ClassWorkshop w = options.elementAt(i);
+                                        return GestureDetector(
+                                            onTap: (){
+                                              onSelected(w);
+                                            },
+                                            child: ListTile(title: Text(w.name))
+                                        );
+                                      })
+                              ),
+                            ));
+                      },
                     onSelected: (ClassWorkshop p) {
                       if (widget.taskId > 0) {
                         sq(tr("Change workshop?"), () {
@@ -205,10 +276,24 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                         _workshop = p;
                       }
                     },
-                  ))
+                  )),
+              widget.taskId == 0 ? Container() : SizedBox(width: 36, height: 36, child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.all(0),
+                    side: BorderSide(color: Colors.transparent)
+                ),
+                child: Image.asset(
+                  "images/delete.png",
+                  width: 36,
+                  height: 36,
+                ),
+                onPressed: () {
+                    _autoTextEditingController2.clear();
+                },
+              )),
             ])),
         Container(
-            margin: EdgeInsets.all(5),
+            padding: EdgeInsets.all(5),
             child: Row(children: [
               Text(
                 tr("Stage"),
@@ -218,7 +303,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
               Container(width: 150, child: Text(_stage == null ? "?" : _stage!.name, style: TextStyle(fontSize: 18)))
             ])),
         Container(
-            margin: EdgeInsets.all(5),
+            padding: EdgeInsets.all(5),
             child: Row(
               children: [
                 Text(tr("Date created")),
@@ -232,7 +317,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
               ],
             )),
         Container(
-            margin: EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
             child: Row(
               children: [
                 Text(tr("Total qty")),
@@ -253,9 +338,9 @@ class TheTaskState extends BaseWidgetState<TheTask> {
           animation: true,
           animationDuration: 1000,
           lineHeight: 20.0,
-          percent: 0.3,
+          percent: _totalpercent / 100,
           center: Text(
-            "30%",
+            "${_totalpercent.toStringAsFixed(1)}%",
             style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w600, color: Colors.black),
           ),
           linearStrokeCap: LinearStrokeCap.roundAll,

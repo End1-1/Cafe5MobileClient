@@ -5,6 +5,7 @@ import 'package:cafe5_mobile_client/class_workshop.dart';
 import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
+import 'package:cafe5_mobile_client/the_task.dart';
 import 'package:cafe5_mobile_client/translator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,12 +22,16 @@ class TheWorkshops extends StatefulWidget {
   }
 }
 
-class TheWorkshopsState extends BaseWidgetState<TheWorkshops> {
+class TheWorkshopsState extends BaseWidgetState<TheWorkshops> with TickerProviderStateMixin {
   List<ClassWorkshop> workshop = [];
   ClassWorkshop? _workshop;
   bool _dataLoading = false;
   NetworkTable _tw = NetworkTable();
   NetworkTable _td = NetworkTable();
+  late AnimationController animationController;
+  TextEditingController _autoTextEditingController = TextEditingController();
+  FocusNode _autoFocus = FocusNode();
+  GlobalKey _autoKey = GlobalKey();
 
   @override
   void handler(Uint8List data) {
@@ -71,6 +76,13 @@ class TheWorkshopsState extends BaseWidgetState<TheWorkshops> {
   @override
   void initState() {
     super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    )..addListener(() {
+        setState(() {});
+      });
+    animationController.repeat(reverse: false);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       workshop.clear();
       Db.query('workshop').then((map) {
@@ -78,9 +90,17 @@ class TheWorkshopsState extends BaseWidgetState<TheWorkshops> {
           ClassWorkshop p = ClassWorkshop(id: map[i]['id'], name: map[i]["name"]);
           workshop.add(p);
         });
-        setState(() {});
+        setState(() {
+          animationController.stop();
+        });
       });
     });
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -89,38 +109,107 @@ class TheWorkshopsState extends BaseWidgetState<TheWorkshops> {
         body: SafeArea(
             child: Column(
       children: [
-        Container(
-            margin: EdgeInsets.all(5),
-            child: Row(children: [
-              Text(
-                tr("Workshop"),
-                style: TextStyle(fontSize: 22),
-              ),
-              Expanded(child: Container()),
-              Visibility(
-                  visible: workshop.length > 0,
-                  child: Container(
-                      width: 150,
-                      child: Autocomplete<ClassWorkshop>(
+        Visibility(
+            visible: workshop.length == 0,
+            child: Container(
+                margin: EdgeInsets.only(top: 10),
+                child: Align(
+                    alignment: Alignment.center,
+                    child: CircularProgressIndicator(
+                      value: animationController.value,
+                    )))),
+        Visibility(
+            visible: workshop.length > 0,
+            child: Container(
+                padding: EdgeInsets.all(5),
+                color: Colors.black12,
+                child: Row(children: [
+                  Container(
+                      margin: EdgeInsets.only(right: 5),
+                      child: Text(
+                        tr("Workshop"),
+                        style: TextStyle(fontSize: 22),
+                      )),
+                  Container(
+                      width: 200,
+                      margin: EdgeInsets.only(right: 5),
+                      child: RawAutocomplete<ClassWorkshop>(
+                        textEditingController: _autoTextEditingController,
+                        focusNode: _autoFocus,
+                        key: _autoKey,
                         displayStringForOption: (option) => option.name,
                         optionsBuilder: (TextEditingValue t) {
+                          // if (t.text.isEmpty) {
+                          //   return List.filled(0, ClassWorkshop(id: 0, name: ""));
+                          // }
                           return workshop.where((ClassWorkshop p) {
                             return p.name.toLowerCase().startsWith(t.text.toLowerCase());
                           }).toList();
                         },
                         fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                          return TextField(
-                            controller: fieldTextEditingController,
-                            focusNode: fieldFocusNode,
-                          );
+                          return TextField(controller: fieldTextEditingController, focusNode: fieldFocusNode, style: TextStyle(fontSize: 18));
                         },
-                        onSelected: (ClassWorkshop p) {
-                          _workshop = p;
-                          _loadTWorkshop(_workshop!.id);
+                        optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<ClassWorkshop> onSelected, Iterable<ClassWorkshop> options) {
+                          return Align(
+                              alignment: Alignment.topLeft,
+                              child: Material(
+                                child: Container(
+                                    width: 300,
+                                    height: 400,
+                                    child: ListView.builder(
+                                        itemCount: options.length,
+                                        itemBuilder: (BuildContext context, int i) {
+                                          final ClassWorkshop w = options.elementAt(i);
+                                          return GestureDetector(
+                                              onTap: () {
+                                                onSelected(w);
+                                              },
+                                              child: ListTile(title: Text(w.name)));
+                                        })),
+                              ));
                         },
-                      )))
-            ])),
-        Expanded(child: SingleChildScrollView(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: _table())))
+                        onSelected: (ClassWorkshop w) {
+                          _workshop = w;
+                          _loadTWorkshop(w.id);
+                        },
+                      )),
+                  SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(padding: EdgeInsets.all(0), side: BorderSide(color: Colors.transparent)),
+                        child: Image.asset(
+                          "images/delete.png",
+                          width: 36,
+                          height: 36,
+                        ),
+                        onPressed: () {
+                          _autoTextEditingController.clear();
+                          setState(() {
+                            _td = NetworkTable();
+                            _tw = NetworkTable();
+                          });
+                        },
+                      )),
+                  Expanded(child: Container()),
+                  SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(padding: EdgeInsets.all(0), side: BorderSide(color: Colors.transparent)),
+                        child: Image.asset(
+                          "images/refresh.png",
+                          width: 36,
+                          height: 36,
+                        ),
+                        onPressed: () {
+                          if (_workshop != null) {
+                            _loadTWorkshop(_workshop!.id);
+                          }
+                        },
+                      )),
+                ]))),
+        Expanded(child: SingleChildScrollView(padding: EdgeInsets.all(0), child: SingleChildScrollView(padding: EdgeInsets.all(0), scrollDirection: Axis.horizontal, child: _table())))
       ],
     )));
   }
@@ -159,30 +248,55 @@ class TheWorkshopsState extends BaseWidgetState<TheWorkshops> {
 
   Widget _tl2(int code) {
     return Row(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(margin: EdgeInsets.only(right: 15), color: Colors.black12, height: 200, width: 200, child: Align(alignment: Alignment.center, child: Text("IMAGE"))),
+       GestureDetector(
+         onTap: ()
+    {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: code)));
+    }
+         ,
+           child: Container(margin: EdgeInsets.only(right: 15), color: Colors.black12, height: 200, width: 200,
+          child: Align(
+              alignment: Alignment.center,
+              child: Image.asset("images/dress.png")))),
       Column(children: _stages(code)),
     ]);
   }
 
   Widget _tl1(String code, String date, String qty, int taskid, String cmpt) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [Container(width: 200, margin: EdgeInsets.only(right: 15), child: Text(tr("Goods code"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))), Container(width: 120, margin: EdgeInsets.only(right: 15), child: Text(tr("Date"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))), Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("Qty", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))), Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("%", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))],
-        ),
-        Row(
-          children: [Container(width: 200, margin: EdgeInsets.only(right: 15), child: Text(code, style: TextStyle(fontSize: 18))), Container(width: 120, margin: EdgeInsets.only(right: 15), child: Text(date, style: TextStyle(fontSize: 18))), Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text(qty, style: TextStyle(fontSize: 18))), Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("$cmpt%", style: TextStyle(fontSize: 18)))],
-        ),
-        Container(
-          height: 10,
-        ),
-        _tl2(taskid),
-        Container(
-          height: 70,
-        ),
-      ],
-    );
+    return Container(
+        margin: EdgeInsets.only(top: 5, bottom: 5),
+        child: Container(
+          color: Color(0xffddeeaa),
+          child: Column(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Container(
+                color: Color(0xFFADBE76),
+                child: Column(children: [
+                  Row(
+                    children: [
+                      Container(width: 200, margin: EdgeInsets.only(right: 15), child: Text(tr("Goods code"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                      Container(width: 120, margin: EdgeInsets.only(right: 15), child: Text(tr("Date"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                      Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("Qty", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                      Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("%", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(width: 200, margin: EdgeInsets.only(right: 15), child: Text(code, style: TextStyle(fontSize: 18))),
+                      Container(width: 120, margin: EdgeInsets.only(right: 15), child: Text(date, style: TextStyle(fontSize: 18))),
+                      Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text(qty, style: TextStyle(fontSize: 18))),
+                      Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("$cmpt%", style: TextStyle(fontSize: 18))),
+                    ],
+                  )
+                ])),
+            Container(
+              height: 10,
+            ),
+            _tl2(taskid),
+            Container(
+              height: 70,
+            ),
+          ]),
+        ));
   }
 
   List<Widget> _tl1s() {
