@@ -30,7 +30,7 @@ class WidgetChooseSettingsState extends BaseWidgetState {
         m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_auth);
         m.addString(Config.getString(key_server_username));
         m.addString(Config.getString(key_server_password));
-        ClientSocket.send(m.data());
+        sendSocketMessage(m);
         break;
       case SocketMessage.c_auth:
         int userid = m.getInt();
@@ -39,6 +39,14 @@ class WidgetChooseSettingsState extends BaseWidgetState {
         }
         break;
     }
+  }
+
+  @override
+  void connected(){
+    print("WidgetChooseSettings.connected()");
+    SocketMessage.resetPacketCounter();
+    SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_hello);
+    sendSocketMessage(m);
   }
 
   @override

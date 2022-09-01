@@ -197,6 +197,6 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
     m.addDouble(qty);
     m.addDouble(widget.price);
     m.addString(DateFormat("dd/MM/yyyy").format(DateTime.now()));
-    ClientSocket.send(m.data());
+    sendSocketMessage(m);
   }
 }

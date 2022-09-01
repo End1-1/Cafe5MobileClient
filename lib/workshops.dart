@@ -61,7 +61,7 @@ class TheWorkshopsState extends BaseWidgetState<TheWorkshops> with TickerProvide
             m.addInt(SocketMessage.op_load_workshop_detail);
             m.addString(Config.getString(key_database_name));
             m.addInt(_workshop!.id);
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
           case SocketMessage.op_load_workshop_detail:
             setState(() {
@@ -339,7 +339,7 @@ class TheWorkshopsState extends BaseWidgetState<TheWorkshops> with TickerProvide
     m.addInt(SocketMessage.op_load_workshop);
     m.addString(Config.getString(key_database_name));
     m.addInt(id);
-    ClientSocket.send(m.data());
+    sendSocketMessage(m);
   }
 
   ClassWorkshop? _workshopById(int id) {

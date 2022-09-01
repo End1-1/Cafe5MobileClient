@@ -9,6 +9,7 @@ void main() async {
   await Config.init();
   Db.init(dbCreate);
   ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);
+  ClientSocket.socket.connect();
   runApp(const MyApp());
 }
 

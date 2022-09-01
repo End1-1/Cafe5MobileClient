@@ -25,7 +25,8 @@ Map<String, String> vals = {
   'input right quantity':'Մուտքագրեք ճիշտ քանակ',
   'nothing selected':'ուչինչ նշված չէ',
   'change current state?':'Փոխել՞ փուլը',
-  'save': 'Պահպանել'
+  'save': 'Պահպանել',
+  'unknown':'Անհայտ'
 };
 
 String tr(String s) {

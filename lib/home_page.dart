@@ -10,6 +10,7 @@ import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/workshops.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'client_socket.dart';
 
@@ -62,7 +63,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
   }
 
   @override
-  void handler(Uint8List data) {
+  void handler(Uint8List data) async {
     _dataLoading = false;
     SocketMessage m = SocketMessage(messageId: 0, command: 0);
     m.setBuffer(data);
@@ -108,87 +109,111 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
             nt.readData(m);
             nt.readStrings(m);
 
-            Db.delete("delete from products");
-            for (int i = 0; i < nt.rowCount; i++) {
-              Db.insert("insert into products (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
-            }
+            await Db.db!.transaction((txn) async {
+              Batch b = txn.batch();
+              b.delete("products");
+              for (int i = 0; i < nt.rowCount; i++) {
+                b.insert("products", {"id": nt.getRawData(i, 0), "name": nt.getRawData(i, 1)});
+              }
+              await b.commit();
+            });
+
 
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("rwmftasks");
             m.addInt(SocketMessage.op_get_processes);
             m.addString(Config.getString(key_database_name));
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
           case SocketMessage.op_get_employes:
             NetworkTable nt = NetworkTable();
             nt.readFromSocketMessage(m);
-            Db.delete("delete from employes");
-            for (int i = 0; i < nt.rowCount; i++) {
-              Db.insert("insert into employes (id, group_id, name) values (?,?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2)]);
-            }
-
+            await Db.db!.transaction((txn) async {
+              Batch b = txn.batch();
+              b.delete("employes");
+              for (int i = 0; i < nt.rowCount; i++) {
+                b.insert("employes", {"id":nt.getRawData(i, 0), "group_id": nt.getRawData(i, 1), "name": nt.getRawData(i, 2)});
+              }
+              await b.commit();
+            });
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("rwmftasks");
             m.addInt(SocketMessage.op_get_task_list);
             m.addString(Config.getString(key_database_name));
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
           case SocketMessage.op_get_processes:
             NetworkTable nt = NetworkTable();
             nt.readFromSocketMessage(m);
-            Db.delete("delete from processes");
-            for (int i = 0; i < nt.rowCount; i++) {
-              Db.insert("insert into processes (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
-            }
-
+            await Db.db!.transaction((txn) async {
+              Batch b = txn.batch();
+              b.delete("processes");
+              for (int i = 0; i < nt.rowCount; i++) {
+                b.insert("processes", {"id": nt.getRawData(i, 0), "name": nt.getRawData(i, 1)});
+              }
+              await b.commit();
+            });
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("rwmftasks");
             m.addInt(SocketMessage.op_get_storage_list);
             m.addString(Config.getString(key_database_name));
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
           case SocketMessage.op_get_storage_list:
             NetworkTable nt = NetworkTable();
             nt.readFromSocketMessage(m);
-            Db.delete("delete from storages");
-            for (int i = 0; i < nt.rowCount; i++) {
-              Db.insert("insert into storages (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
-            }
+            await Db.db!.transaction((txn) async {
+              Batch b = txn.batch();
+              b.delete("storages");
+              for (int i = 0; i < nt.rowCount; i++) {
+                b.insert("storages", {"id": nt.getRawData(i, 0), "name": nt.getRawData(i, 1)});
+              }
+              await b.commit();
+            });
 
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("rwmftasks");
             m.addInt(SocketMessage.op_get_workshop_list);
             m.addString(Config.getString(key_database_name));
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
           case SocketMessage.op_get_workshop_list:
             NetworkTable nt = NetworkTable();
             nt.readFromSocketMessage(m);
 
-            Db.delete("delete from workshop");
-            for (int i = 0; i < nt.rowCount; i++) {
-              Db.insert("insert into workshop (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
-            }
+            await Db.db!.transaction((txn) async {
+              Batch b = txn.batch();
+              b.delete("workshop");
+              for (int i = 0; i < nt.rowCount; i++) {
+                b.insert("workshop", {"id": nt.getRawData(i, 0), "name": nt.getRawData(i, 1)});
+              }
+              await b.commit();
+            });
 
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("rwmftasks");
             m.addInt(SocketMessage.op_get_stages);
             m.addString(Config.getString(key_database_name));
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
           case SocketMessage.op_get_stages:
             NetworkTable nt = NetworkTable();
             nt.readFromSocketMessage(m);
-            Db.delete("delete from stages");
-            for (int i = 0; i < nt.rowCount; i++) {
-              Db.insert("insert into stages (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
-            }
+
+            await Db.db!.transaction((txn) async {
+              Batch b = txn.batch();
+              b.delete("stages");
+              for (int i = 0; i < nt.rowCount; i++) {
+                 b.insert("stages", {"id":nt.getRawData(i, 0), "name":nt.getRawData(i, 1)});
+              }
+              await b.commit();
+            });
 
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("rwmftasks");
             m.addInt(SocketMessage.op_get_employes);
             m.addString(Config.getString(key_database_name));
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
         }
         break;
@@ -209,8 +234,8 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
               child: Align(
                   alignment: Alignment.center,
                   child: Container(
-                      margin: EdgeInsets.only(top: 20, bottom: 20),
-                      child: Text(
+                      margin: const EdgeInsets.only(top: 20, bottom: 20),
+                      child: const Text(
                         "ELINA",
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                       )))),
@@ -218,16 +243,15 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
               visible: _allDataLoaded,
               child: Container(
                   //color: Colors.green,
-                  child: Row(
+                  child: SizedBox(height: 40, child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
                 children: [
-                  Expanded(
-                      child: Align(
-                    alignment: Alignment.center,
-                    child: OutlinedButton(
+                   OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
                         backgroundColor: Colors.blueGrey,
-                        side: BorderSide(
+                        side: const BorderSide(
                           width: 1.0,
                           color: Colors.black38,
                           style: BorderStyle.solid,
@@ -236,17 +260,13 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => TheTask(taskId: 0)));
                       },
-                      child: Text(tr("New task"), style: TextStyle(color: Colors.white)),
-                    ),
-                  )),
-                  Expanded(
-                      child: Align(
-                    alignment: Alignment.center,
-                    child: OutlinedButton(
+                      child:   Text(tr("New task"), style: const TextStyle(color: Colors.white)),
+                    )
+                  , OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
                         backgroundColor: Colors.blueGrey,
-                        side: BorderSide(
+                        side: const BorderSide(
                           width: 1.0,
                           color: Colors.black38,
                           style: BorderStyle.solid,
@@ -262,16 +282,12 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
                         });
                       },
                       child: Text(tr("Edit task"), style: TextStyle(color: Colors.white)),
-                    ),
-                  )),
-                  Expanded(
-                      child: Align(
-                    alignment: Alignment.center,
-                    child: OutlinedButton(
+                  ),
+                  OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
                         backgroundColor: Colors.blueGrey,
-                        side: BorderSide(
+                        side: const BorderSide(
                           width: 1.0,
                           color: Colors.black38,
                           style: BorderStyle.solid,
@@ -281,10 +297,9 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
                         Navigator.push(context, MaterialPageRoute(builder: (context) => TheWorkshops()));
                       },
                       child: Text(tr("Workshops"), style: TextStyle(color: Colors.white)),
-                    ),
-                  ))
+                  ),
                 ],
-              ))),
+              )))),
           // Container (
           //     color: Colors.green,
           //     child : Align(
@@ -399,6 +414,6 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
     m.addString("rwmftasks");
     m.addInt(SocketMessage.op_get_products);
     m.addString(Config.getString(key_database_name));
-    ClientSocket.send(m.data());
+    sendSocketMessage(m);
   }
 }

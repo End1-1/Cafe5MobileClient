@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:cafe5_mobile_client/config.dart';
 
 class SocketMessage {
   static const int c_hello = 1;
   static const int c_auth = 4;
   static const int c_dllop = 10;
+  static const int c_dllplugin = 11;
 
   static const int op_get_task_list = 1;
   static const int op_get_products = 2;
@@ -21,6 +24,8 @@ class SocketMessage {
   static const int op_set_state = 13;
   static const int op_load_workshop = 14;
   static const int op_load_workshop_detail = 15;
+
+  static const String waiterclientp = "8b90e61a-1385-4fb4-85ce-f23849045e69";
 
   late BytesBuilder buffer;
   int messageId;
@@ -111,17 +116,19 @@ class SocketMessage {
 
   String getString() {
     int sz = getInt();
-    String str = utf8.decode(buffer.toBytes().sublist(_dataPosition, _dataPosition + sz));
+    String str = utf8.decode(buffer.toBytes().sublist(_dataPosition, _dataPosition + sz - 1));
     _dataPosition += sz;
     return str;
   }
 
   Uint8List data() {
+    int pn = packetNumber();
+    print("packet number: $pn");
     final BytesBuilder finalBuffer = BytesBuilder();
     //pattern
     finalBuffer.add([0x03, 0x04, 0x15]);
     //packet number
-    finalBuffer.add(Uint8List(4)..buffer.asByteData().setInt32(0, packetNumber(), Endian.little));
+    finalBuffer.add(Uint8List(4)..buffer.asByteData().setInt32(0, pn, Endian.little));
     //message id
     finalBuffer.add(Uint8List(4)..buffer.asByteData().setInt32(0, messageId, Endian.little));
     //command
@@ -140,11 +147,19 @@ class SocketMessage {
 
   static int packetNumber() {
     int pn = _packetNumberCounter++;
-    print("Packet: " + pn.toString());
     return pn;
   }
 
   static void resetPacketCounter() {
     _packetNumberCounter = 1;
+  }
+
+  static SocketMessage dllplugin(int op) {
+    print("new socketmessage $c_dllplugin : $op");
+    SocketMessage m = SocketMessage(messageId: messageNumber(), command: c_dllplugin);
+    m.addString(waiterclientp);
+    m.addInt(op);
+    m.addByte(Config.getInt(key_protocol_version));
+    return m;
   }
 }

@@ -2,104 +2,112 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:cafe5_mobile_client/client_socket_interface.dart';
-import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
 
 class ClientSocket {
 
   static late ClientSocket socket;
   static int _socketState = 0;
-  SecureSocket? _socket;
+  static SecureSocket? _socket;
   String remoteAddress;
   int remotePort;
   BytesBuilder _tempBuffer = BytesBuilder();
-  List<SocketInterface> _interfaces = [];
+  static List<SocketInterface> _interfaces =[];
 
   ClientSocket ({required this.remoteAddress, required this.remotePort});
 
   static void init(String ip, int port) async {
     socket = new ClientSocket(remoteAddress: ip, remotePort: port);
-    socket.connectToServer();
+  }
+
+  void connect() async {
+    while (_interfaces.length == 0) {
+      await Future.delayed(const Duration(seconds: 5));
+    }
+    connectToServer();
   }
 
   Future<bool> connectToServer() async {
+    if (_socket != null) {
+      _socket!.destroy();
+    }
+    print("Connect to ${socket.remoteAddress}:${socket.remotePort}");
     await SecureSocket.connect(socket.remoteAddress, socket.remotePort, timeout: Duration(seconds: 10), onBadCertificate: (x){return true;}).then((s) {
-      setSocketState(1);
-      print("Socket connected");
+      print("Socket connected ${s.hashCode}");
       _socket = s as SecureSocket;
-
-      _socket!.listen((data) {
-        _tempBuffer.add(data);
-        //print(data);
-        int expectedSize = 0;
-        do {
-           expectedSize = SocketMessage.calculateDataSize(_tempBuffer);
-          if (expectedSize <= _tempBuffer.length - 17) {
-            print(_tempBuffer.length);
-            for (SocketInterface s in _interfaces) {
-              try {
-                s.handler(_tempBuffer.toBytes().sublist(0, expectedSize + 17));
-              } catch (e) {
-                print(e.toString());
-              }
-            }
-            BytesBuilder bb = BytesBuilder();
-            bb.add(_tempBuffer.toBytes().sublist(expectedSize + 17, _tempBuffer
-                .toBytes()
-                .length));
-            _tempBuffer.clear();
-            if (bb.length > 0) {
-              _tempBuffer.add(bb.toBytes());
-              expectedSize = SocketMessage.calculateDataSize(_tempBuffer);
-              if (expectedSize > _tempBuffer.length - 17) {
-                expectedSize = 0;
-              }
-            } else {
-              expectedSize = 0;
-            }
-          } else {
-            break;
-          }
-        } while (expectedSize != 0);
-      }, onDone: () {
-        setSocketState(0);
-        print("Socket disconnected");
-        _reconnectToServer();
-      }, onError: (err)  {
-        setSocketState(0);
-        print(err);
-        _reconnectToServer();
-      });
+      _listenSocket();
+      setSocketState(1);
     }).onError((error, stackTrace) {
       print(error);
       setSocketState(0);
       _reconnectToServer();
     });
 
-    SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_hello);
-    try {
-      _socket!.add(m.data());
-    } catch (e) {
-      print(e);
-      return false;
-    }
     return true;
   }
 
+  void _listenSocket() async {
+    _socket!.listen((data) {
+      _tempBuffer.add(data);
+      //print(data);
+      int expectedSize = 0;
+      do {
+        expectedSize = SocketMessage.calculateDataSize(_tempBuffer);
+        if (expectedSize <= _tempBuffer.length - 17) {
+          print(_tempBuffer.length);
+          for (SocketInterface s in _interfaces) {
+            try {
+              s.handler(_tempBuffer.toBytes().sublist(0, expectedSize + 17));
+            } catch (e) {
+              print(e.toString());
+            }
+          }
+          BytesBuilder bb = BytesBuilder();
+          bb.add(_tempBuffer.toBytes().sublist(expectedSize + 17, _tempBuffer
+              .toBytes()
+              .length));
+          _tempBuffer.clear();
+          if (bb.length > 0) {
+            _tempBuffer.add(bb.toBytes());
+            expectedSize = SocketMessage.calculateDataSize(_tempBuffer);
+            if (expectedSize > _tempBuffer.length - 17) {
+              expectedSize = 0;
+            }
+          } else {
+            expectedSize = 0;
+          }
+        } else {
+          break;
+        }
+      } while (expectedSize != 0);
+    }, onDone: () {
+      setSocketState(0);
+      print("Socket disconnected ${_socket.hashCode}");
+      _reconnectToServer();
+    }, onError: (err)  {
+      setSocketState(0);
+      print("socket error $err ${_socket.hashCode}");
+    });
+  }
+
   Future<bool> _reconnectToServer() async {
-    print("Socket reconnecting...");
-    SocketMessage.resetPacketCounter();
-    await Future.delayed(const Duration(seconds: 5));
+    const int sec = 5;
+    print("Wait $sec second");
+    await Future.delayed(const Duration(seconds: sec));
+    print("Socket reconnecting... ${_socket.hashCode}");
     await connectToServer();
     return true;
   }
 
   void addInterface(SocketInterface si) {
     _interfaces.add(si);
+    print("addInterface ${_interfaces.length}: ${_interfaces.join(",")}");
   }
 
   void removeInterface(SocketInterface si) {
+    print("remove Interface ${si.runtimeType}");
     _interfaces.remove(si);
+    print("after removeInterface ${_interfaces.length}: ${_interfaces.join(",")}");
   }
 
   static String imageConnectionState() {
@@ -114,25 +122,32 @@ class ClientSocket {
     return "images/wifi_off.png";
   }
 
-  static void send(List<int> data) {
+  static int send(SocketMessage m) {
     try {
-      socket._socket!.add(data);
+      if (_socket == null) {
+        print("socket is null");
+        return 0;
+      }
+      print("Send data ${_socket.hashCode}");
+      _socket!.add(m.data());
     } catch (e) {
       print(e);
-      socket._reconnectToServer();
+      return 0;
     }
+    return m.messageId;
   }
 
   static void setSocketState(int state) {
     _socketState = state;
-    for (SocketInterface s in socket._interfaces) {
+    print("setSocketState $state for ${_interfaces.length}: ${_interfaces.join(",")}");
+    for (SocketInterface s in _interfaces) {
       switch (_socketState) {
-        case 0:
-          s.disconnected();
-          break;
-        case 1:
-          s.connected();
-          break;
+         case 0:
+           s.disconnected();
+           break;
+         case 1:
+           s.connected();
+           break;
         case 2:
           s.authenticate();
           break;
