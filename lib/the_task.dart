@@ -210,20 +210,27 @@ class TheTaskState extends BaseWidgetState<TheTask> {
         //WORKSHOP
         Container(
             width: double.infinity,
-            color: Colors.green,
-            padding: EdgeInsets.all(5),
-            child: Row(children: [
-              Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-              Text(
-                tr("Workshop"),
-                style: TextStyle(fontSize: 22),
-              ),
-              Row(children:[ Container(
-                  width: 150,
-                  child: RawAutocomplete<ClassWorkshop>(
+            decoration: BoxDecoration(border: Border.all(color: const Color(0xABABABEA)), color: const Color(0xEAD9D9D9)),
+            padding: const EdgeInsets.all(5),
+            child: Column(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Expanded(
+                    child: Text(
+                      tr("Workshop"),
+                      style: const TextStyle(fontSize: 22),
+                    )),
+                Expanded(
+                    child: Container(
+                        padding: const EdgeInsets.all(5),
+                        child: Text(
+                          tr("Stage"),
+                          style: const TextStyle(fontSize: 22),
+                        ))),
+              ]),
+              Row(children: [
+                Expanded(
+                    child: Row(children: [
+                  Expanded(child: RawAutocomplete<ClassWorkshop>(
                     textEditingController: _autoTextEditingController2,
                     key: _autoKey2,
                     focusNode: _autoFocus2,
@@ -275,51 +282,71 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                       }
                     },
                   )),
-              widget.taskId == 0
-                  ? Container()
-                  : ClassOutlinedButton.createImage((){
-                _autoTextEditingController2.clear();
-              },"images/delete.png",)
-        ])
-           ]),
-
-
-        //STAGE
-        Container(
-            padding: const EdgeInsets.all(5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-              Text(
-                tr("Stage"),
-                style: const TextStyle(fontSize: 22),
-              ),
-              SizedBox(width: 150, child: Text(_stage == null ? "?" : _stage!.name, style: const TextStyle(fontSize: 18)))
-            ])),
-
+                  widget.taskId == 0
+                      ? Container()
+                      : ClassOutlinedButton.createImage(() {
+                          _autoTextEditingController2.clear();
+                        }, "images/delete.png", w: 24, h: 24)
+                ])),
+                Expanded(child: Container(margin: const EdgeInsets.only(left: 5), child: Text(_stage == null ? "?" : _stage!.name, style: const TextStyle(fontSize: 18))))
+              ]),
             ])),
 
         Container(
             padding: EdgeInsets.all(5),
-            child: Row(
-              children: [
-                Text(tr("Date created")),
-                Container(
-                  margin: EdgeInsets.only(left: 5),
-                  child: Text(_dateCreated),
-                ),
-                Expanded(child: Container()),
-                Text(tr("Time created")),
-                Container(margin: EdgeInsets.only(left: 5), child: Text(_timeCreated))
-              ],
-            )),
+            child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                      child: Container(
+                    padding: EdgeInsets.all(5),
+
+                    child: Text(tr("Date created")),
+                  )),
+                  Expanded(
+                      child: Container(
+                    padding: EdgeInsets.all(5),
+                    //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
+                    child: Text(tr("Total qty")),
+                  ))
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Container(
+                        padding: EdgeInsets.all(5),
+                        //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
+                        child: Text("$_dateCreated $_timeCreated")),
+                  ),
+                  Expanded(
+                    child: Container(
+                        padding: const EdgeInsets.all(5),
+                        //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
+                        child: TextFormField(
+                            decoration: const InputDecoration(
+                                //border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(vertical: 10), //Change this value to custom as you like
+                                isDense: true, // and add this line
+                                hintText: 'User Name',
+                                hintStyle: TextStyle(
+                                  color: Color(0xFFF00),
+                                )),
+                            readOnly: widget.taskId > 0,
+                            keyboardType: TextInputType.number,
+                            controller: _productQtyTextController,
+                            inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly])),
+                  )
+                ],
+              )
+            ])),
+
         Container(
             padding: EdgeInsets.all(10),
             child: Row(
               children: [
-                Text(tr("Total qty")),
-                Container(margin: EdgeInsets.only(left: 5),
-                    width: 100, child: TextFormField(readOnly: widget.taskId > 0, keyboardType: TextInputType.number, controller: _productQtyTextController, inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly])),
                 Expanded(child: Container()),
                 widget.taskId == 0
                     ? TextButton(onPressed: _createTask, child: Text(tr("Create")))
