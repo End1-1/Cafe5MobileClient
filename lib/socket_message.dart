@@ -24,6 +24,7 @@ class SocketMessage {
   static const int op_set_state = 13;
   static const int op_load_workshop = 14;
   static const int op_load_workshop_detail = 15;
+  static const int op_save_task_notes = 16;
 
   static const String waiterclientp = "8b90e61a-1385-4fb4-85ce-f23849045e69";
 

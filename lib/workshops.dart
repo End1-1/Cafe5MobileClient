@@ -276,7 +276,9 @@ class TheWorkshopsState extends BaseWidgetState<TheWorkshops> with TickerProvide
                       Container(width: 200, margin: EdgeInsets.only(right: 15), child: Text(tr("Goods code"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
                       Container(width: 120, margin: EdgeInsets.only(right: 15), child: Text(tr("Date"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
                       Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("Qty", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                      Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("%", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))
+                      Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("%", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                      Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("Ready", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                      Container(width: 50, margin: EdgeInsets.only(right: 15), child: Text("Out", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))
                     ],
                   ),
                   Row(

@@ -1,4 +1,4 @@
-Map<String, String> vals = {
+final Map<String, String> vals = {
   'new task': 'Նոր առաջադրանք',
   'select task': 'Ընտրեք առաջադրանք',
   'edit task': 'Խմբագրել առաջադրանք',
@@ -26,7 +26,10 @@ Map<String, String> vals = {
   'nothing selected':'ուչինչ նշված չէ',
   'change current state?':'Փոխել՞ փուլը',
   'save': 'Պահպանել',
-  'unknown':'Անհայտ'
+  'unknown':'Անհայտ',
+  'qty':'Քնկ',
+  'ready':'Պատրաստ',
+  'out':'Ելք'
 };
 
 String tr(String s) {
