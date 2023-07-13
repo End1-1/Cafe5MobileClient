@@ -28,8 +28,10 @@ class WidgetChooseSettingsState extends BaseWidgetState {
     switch (m.command) {
       case SocketMessage.c_hello:
         m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_auth);
-        m.addString(Config.getString(key_server_username));
-        m.addString(Config.getString(key_server_password));
+        // m.addString(Config.getString(key_server_username));
+        // m.addString(Config.getString(key_server_password));
+        m.addString('main');
+        m.addString('main');
         sendSocketMessage(m);
         break;
       case SocketMessage.c_auth:

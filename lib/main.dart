@@ -8,7 +8,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Config.init();
   Db.init(dbCreate);
-  ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);
+  //ClientSocket.init('37.252.66.86', 10002);
+  ClientSocket.init('192.168.88.42', 10002);
+  Config.setString(key_database_name, 'store');
+  //ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);
   ClientSocket.socket.connect();
   runApp(const MyApp());
 }
