@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cafe5_mobile_client/base_widget.dart';
+import 'package:cafe5_mobile_client/screens/journal/screen.dart';
 import 'package:cafe5_mobile_client/store.dart';
 import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/the_task.dart';
@@ -235,8 +236,8 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
                   alignment: Alignment.center,
                   child: Container(
                       margin: const EdgeInsets.only(top: 20, bottom: 20),
-                      child: const Text(
-                        "ELINA",
+                      child: Text(
+                        "ELINA ${Config.getString('appversion')}",
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                       )))),
           Visibility(
@@ -247,6 +248,21 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin, Wid
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                 children: [
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                      backgroundColor: Colors.blueGrey,
+                      side: const BorderSide(
+                        width: 1.0,
+                        color: Colors.black38,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => JournalScreen()));
+                    },
+                    child:   Text(tr("Journal"), style: const TextStyle(color: Colors.white)),
+                  ),
                    OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),

@@ -29,7 +29,14 @@ final Map<String, String> vals = {
   'unknown':'Անհայտ',
   'qty':'Քնկ',
   'ready':'Պատրաստ',
-  'out':'Ելք'
+  'out':'Ելք',
+  'journal': 'Մատյան',
+  'select employee': 'Ընտրեք աշխատողին',
+  'select worker': 'Ընտրեք աշխատողին',
+  'task': 'Առաջադրանք',
+  'list of task': 'Առաջադրանքներ',
+  'teamlead':'Ղեկավար',
+  'employee':'Աշխատող'
 };
 
 String tr(String s) {

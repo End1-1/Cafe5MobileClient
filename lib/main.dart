@@ -1,17 +1,28 @@
+import 'dart:io';
+
 import 'package:cafe5_mobile_client/client_socket.dart';
 import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/widget_choose_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Config.init();
   Db.init(dbCreate);
-  //ClientSocket.init('37.252.66.86', 10002);
-  ClientSocket.init('192.168.88.42', 10002);
+  PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+    String appName = packageInfo.appName;
+    String packageName = packageInfo.packageName;
+    String version = packageInfo.version;
+    String buildNumber = packageInfo.buildNumber;
+    Config.setString('appversion', '$version.$buildNumber');
+  });
+  ClientSocket.init('37.252.66.86', 10002);
+  //ClientSocket.init('192.168.88.42', 10002);
   Config.setString(key_database_name, 'store');
   //ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);
+  HttpOverrides.global = DevHttpOverrides();
   ClientSocket.socket.connect();
   runApp(const MyApp());
 }
@@ -30,5 +41,13 @@ class MyApp extends StatelessWidget {
       home: WidgetChooseSettings(),
       
     );
+  }
+}
+
+class DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
   }
 }

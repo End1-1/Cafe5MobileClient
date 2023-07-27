@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:cafe5_mobile_client/client_socket_interface.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
 
+import 'config.dart';
+
 class ClientSocket {
 
   static late ClientSocket socket;
@@ -35,10 +37,12 @@ class ClientSocket {
     await SecureSocket.connect(socket.remoteAddress, socket.remotePort, timeout: Duration(seconds: 10), onBadCertificate: (x){return true;}).then((s) {
       print("Socket connected ${s.hashCode}");
       _socket = s as SecureSocket;
+      Config.setString("lasterror","");
       _listenSocket();
       setSocketState(1);
     }).onError((error, stackTrace) {
       print(error);
+      Config.setString("lasterror", error.toString());
       setSocketState(0);
       _reconnectToServer();
     });

@@ -22,7 +22,7 @@ class WidgetChooseSettingsState extends BaseWidgetState {
 
   @override
   void handler(Uint8List data) {
-    SocketMessage m = new SocketMessage(messageId: 0, command: 0);
+    SocketMessage m = SocketMessage(messageId: 0, command: 0);
     m.setBuffer(data);
     print(m.command);
     switch (m.command) {
@@ -60,7 +60,9 @@ class WidgetChooseSettingsState extends BaseWidgetState {
 
   @override
   void disconnected() {
-    setState((){});
+    setState((){
+
+    });
   }
 
   @override
@@ -109,6 +111,20 @@ class WidgetChooseSettingsState extends BaseWidgetState {
 
                   },
                   child: Text(tr("Input manual")),
+                ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: () {
+
+                  },
+                  child: Text(Config.getString('appversion')),
+                ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child:  Text(Config.getString('lasterror'),
                 ),
               )
             ]
