@@ -9,10 +9,12 @@ import 'package:intl/intl.dart';
 class JournalModel {
   DateTime date = DateTime.now();
   final dateStream = StreamController();
+  final filterTaskStream = StreamController<bool?>();
   final taskStream = StreamController();
   final employeeStream = StreamController();
   final tableStream = StreamController();
   var task = Task(f_id: 0, f_name: tr('Task'), f_product: 0);
+  var taskFiltered = false;
   Employee? employee;
 
   void changeDate(int lr) {
@@ -30,7 +32,7 @@ class JournalModel {
     final result = await HttpQuery().request({
       'query': HttpQuery.qListOfWorks,
       'f_worker': employee?.f_id ?? 0,
-      'f_task': task.f_id,
+      'f_task': taskFiltered ? task.f_id : 0,
       'f_date': DateFormat('dd/MM/yyyy').format(date)
     });
     if (result[HttpQuery.kStatus] != HttpQuery.hrOk) {
@@ -38,6 +40,12 @@ class JournalModel {
       return;
     }
     tableStream.add(result[HttpQuery.kData]);
+  }
+
+  void changeTaskFilter(bool v) {
+    taskFiltered = v;
+    filterTaskStream.add(v);
+    getTask();
   }
 
 

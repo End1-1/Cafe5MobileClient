@@ -7,6 +7,8 @@ import 'package:cafe5_mobile_client/widget_choose_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'classes/http_query.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Config.init();
@@ -18,8 +20,7 @@ void main() async {
     String buildNumber = packageInfo.buildNumber;
     Config.setString('appversion', '$version.$buildNumber');
   });
-  ClientSocket.init('37.252.66.86', 10002);
-  //ClientSocket.init('192.168.88.42', 10002);
+  ClientSocket.init(HttpQuery.server, 10002);
   Config.setString(key_database_name, 'store');
   //ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);
   HttpOverrides.global = DevHttpOverrides();

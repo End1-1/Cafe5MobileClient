@@ -33,6 +33,14 @@ class JournalScreen extends StatelessWidget {
                           return TxtButton(
                               model.task.f_name, () => getTask(context));
                         })),
+                StreamBuilder<bool?>(
+                  stream: model.filterTaskStream.stream,
+                  builder:(context, snapshot) {
+                    return Checkbox(value: snapshot.data ?? false, onChanged: (v) {
+                      model.changeTaskFilter(v ?? false);
+                    },);
+                  }
+                ),
                 SmallButton("images/left.png", () => model.changeDate(-1)),
                 StreamBuilder(
                     stream: model.dateStream.stream,
