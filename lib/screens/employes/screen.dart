@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cafe5_mobile_client/classes/http_query.dart';
 import 'package:cafe5_mobile_client/screens/structs/employee.dart';
 import 'package:cafe5_mobile_client/classes/small_button.dart';

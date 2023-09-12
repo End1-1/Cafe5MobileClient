@@ -26,7 +26,13 @@ class HttpQuery {
   static const qChangeQty = 9;
   static const qRemoveWork = 10;
   static const qRemoveWorker = 11;
-
+  static const qWorkDetails = 12;
+  static const qWorkDetailsList = 13;
+  static const qWorkDetailsUpdate = 14;
+  static const qWorkDetailsDone = 15;
+  static const qWorkDetailsUpdateDone = 16;
+  static const qRemoveWorkDetails = 17;
+  static const qWorkDetailsUpdateDoneArray = 18;
 
   Future<Map<String, dynamic>> request(Map<String, Object?> inData) async {
     Map<String, Object?> outData = {};

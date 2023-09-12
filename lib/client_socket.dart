@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:cafe5_mobile_client/client_socket_interface.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';

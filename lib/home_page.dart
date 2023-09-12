@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:cafe5_mobile_client/base_widget.dart';
 import 'package:cafe5_mobile_client/screens/journal/screen.dart';
-import 'package:cafe5_mobile_client/store.dart';
 import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/the_task.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
@@ -13,7 +12,6 @@ import 'package:cafe5_mobile_client/workshops.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'client_socket.dart';
 
 class WidgetHome extends StatefulWidget {
   @override

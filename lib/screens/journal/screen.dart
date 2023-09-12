@@ -8,6 +8,8 @@ import 'package:cafe5_mobile_client/screens/employes_of_day/screen.dart';
 import 'package:cafe5_mobile_client/screens/list/screen.dart';
 import 'package:cafe5_mobile_client/screens/list_task_works/screen.dart';
 import 'package:cafe5_mobile_client/screens/structs/work.dart';
+import 'package:cafe5_mobile_client/screens/work_details/screen.dart';
+import 'package:cafe5_mobile_client/screens/work_details/screen_done.dart';
 import 'package:cafe5_mobile_client/translator.dart';
 import 'package:flutter/material.dart';
 
@@ -34,13 +36,15 @@ class JournalScreen extends StatelessWidget {
                               model.task.f_name, () => getTask(context));
                         })),
                 StreamBuilder<bool?>(
-                  stream: model.filterTaskStream.stream,
-                  builder:(context, snapshot) {
-                    return Checkbox(value: snapshot.data ?? false, onChanged: (v) {
-                      model.changeTaskFilter(v ?? false);
-                    },);
-                  }
-                ),
+                    stream: model.filterTaskStream.stream,
+                    builder: (context, snapshot) {
+                      return Checkbox(
+                        value: snapshot.data ?? false,
+                        onChanged: (v) {
+                          model.changeTaskFilter(v ?? false);
+                        },
+                      );
+                    }),
                 SmallButton("images/left.png", () => model.changeDate(-1)),
                 StreamBuilder(
                     stream: model.dateStream.stream,
@@ -107,14 +111,18 @@ class JournalScreen extends StatelessWidget {
                       AppDialog.error(context, err);
                       return;
                     }
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ListTaskWorks(model.task, model.employee!, model.date))).then((value) {
+                    Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ListTaskWorks(
+                                    model.task, model.employee!, model.date)))
+                        .then((value) {
                       if (value == null) {
                         AppDialog.error(context, tr('Could not append work'));
                       } else {
                         model.getTask();
                       }
                     });
-
                   })
                 ],
               ),
@@ -131,7 +139,7 @@ class JournalScreen extends StatelessWidget {
                               child: CircularProgressIndicator());
                         }
                         if (snapshot.data == null) {
-                            return Container();
+                          return Container();
                         }
                         final listWork = <Work>[];
                         for (final e in (snapshot.data as List<dynamic>)) {
@@ -160,45 +168,86 @@ class JournalScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        InkWell(onTap:(){
-          AppDialog.question(context, tr('Confirm to remove')).then((value) {
-            if (value != null) {
-              if (value) {
-                HttpQuery().request({'query': HttpQuery.qRemoveWork, 'f_id': w.f_id}).then((value) {
-                  if (value[HttpQuery.kStatus] == HttpQuery.hrOk) {
-                    model.getTask();
-                  } else {
-                    AppDialog.error(context, value[HttpQuery.kData]);
+        InkWell(
+            onTap: () {
+              AppDialog.question(context, tr('Confirm to remove'))
+                  .then((value) {
+                if (value != null) {
+                  if (value) {
+                    HttpQuery().request({
+                      'query': HttpQuery.qRemoveWork,
+                      'f_id': w.f_id
+                    }).then((value) {
+                      if (value[HttpQuery.kStatus] == HttpQuery.hrOk) {
+                        model.getTask();
+                      } else {
+                        AppDialog.error(context, value[HttpQuery.kData]);
+                      }
+                    });
                   }
-                });
-              }
-            }
-          });
-        }, child: Container(alignment: Alignment.centerLeft, height: 80, padding: m, decoration: odd ? od : ed, width: 40, child:
-    Image.asset('images/delete.png', width: 30, height: 30,))),
-      Container(alignment: Alignment.centerLeft, height: 80, padding: m, decoration: odd ? od : ed, width: 150, child: Text(w.f_productname)),
-      Container(alignment: Alignment.centerLeft, height: 80, padding: m, decoration: odd ? od : ed, width: 250, child: Text(w.f_processname)),
-      InkWell(onTap:(){
-        AppDialog.getInt(context, tr('Set quantity')).then((value) {
-          if (value != null) {
-            if (value + w.f_ready > w.f_goal) {
-              AppDialog.error(context, tr('Quantity greater than goal'));
-              return;
-            }
-            HttpQuery().request({'query': HttpQuery.qChangeQty,
-              'f_taskid': model.task.f_id,
-              'f_qty': value,
-            'f_id': w.f_id,
-            'f_process': w.f_process}).then((value) {
-              model.getTask();
-            });
-          }
-        });
-      }, child: Container(alignment: Alignment.centerLeft, height: 80, padding: m, decoration: odd ? od : ed, width: 80, child: Text(w.f_qty.toString()))),
-      Container(alignment: Alignment.centerLeft, height: 80, padding: m, decoration: odd ? od : ed, width: 80, child: Text(w.f_ready.toString())),
-      Container(alignment: Alignment.centerLeft, height: 80, padding: m, decoration: odd ? od : ed, width: 80, child: Text(w.f_goal.toString())),
+                }
+              });
+            },
+            child: Container(
+                alignment: Alignment.centerLeft,
+                height: 80,
+                padding: m,
+                decoration: odd ? od : ed,
+                width: 40,
+                child: Image.asset(
+                  'images/delete.png',
+                  width: 30,
+                  height: 30,
+                ))),
+        Container(
+            alignment: Alignment.centerLeft,
+            height: 80,
+            padding: m,
+            decoration: odd ? od : ed,
+            width: 150,
+            child: Text(w.f_productname)),
+        Container(
+            alignment: Alignment.centerLeft,
+            height: 80,
+            padding: m,
+            decoration: odd ? od : ed,
+            width: 250,
+            child: Text(w.f_processname)),
+        InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (builder) => WorkDetailsScreenDone(
+                          '${model.task.f_name} ${w.f_processname}',
+                          w.f_id, model.task.f_id))).then((value) {
+                model.getTask();
+              });
 
-    ],);
+            },
+            child: Container(
+                alignment: Alignment.centerLeft,
+                height: 80,
+                padding: m,
+                decoration: odd ? od : ed,
+                width: 80,
+                child: Text(w.f_qty.toString()))),
+        Container(
+            alignment: Alignment.centerLeft,
+            height: 80,
+            padding: m,
+            decoration: odd ? od : ed,
+            width: 80,
+            child: Text(w.f_ready.toString())),
+        Container(
+            alignment: Alignment.centerLeft,
+            height: 80,
+            padding: m,
+            decoration: odd ? od : ed,
+            width: 80,
+            child: Text(w.f_goal.toString())),
+      ],
+    );
   }
 
   void getTask(BuildContext context) async {

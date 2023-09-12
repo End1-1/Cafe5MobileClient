@@ -12,7 +12,9 @@ class AppHeader extends StatelessWidget {
     return Scaffold(
         body: SafeArea(
             minimum: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-            child: Column(children: [
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               Row(children: [
                 SmallButton("images/back.png", () => Navigator.pop(context)),
                 Container(

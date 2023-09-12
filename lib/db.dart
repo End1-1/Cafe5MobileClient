@@ -38,7 +38,7 @@ class Db {
     return result;
   }
 
-  static Future<List<Map<String, dynamic?>>> query(String table) async {
+  static Future<List<Map<String, dynamic>>> query(String table) async {
     return await db!.query(table);
   }
 

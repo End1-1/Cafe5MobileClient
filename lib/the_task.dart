@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cafe5_mobile_client/base_widget.dart';
@@ -5,6 +6,7 @@ import 'package:cafe5_mobile_client/class_outlinedbutton.dart';
 import 'package:cafe5_mobile_client/class_workshop.dart';
 import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
+import 'package:cafe5_mobile_client/screens/work_details/screen.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
 import 'package:cafe5_mobile_client/the_task_process.dart';
 import 'package:cafe5_mobile_client/translator.dart';
@@ -29,6 +31,7 @@ class TheTask extends StatefulWidget {
 }
 
 class TheTaskState extends BaseWidgetState<TheTask> {
+  final _detailsStream = StreamController();
   List<Product> products = [];
   List<ClassWorkshop> workshop = [];
   List<ClassStage> stages = [];
@@ -462,6 +465,31 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                                     ],
                                   )
                                 ])),
+
+                        //DETAILS
+                        Divider(),
+                        Row(
+                          children:[Text(tr('Details')),
+                          Expanded(child: Container()),
+                            InkWell(onTap:(){
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (builder) => WorkDetailsScreen(_product!.name, 0, widget.taskId,
+                                          ))).then((value) {
+
+                              });
+                            }, child: Image.asset(
+                              'images/new.png',
+                              width: 30,
+                              height: 30,
+                            )),
+                          const SizedBox(width: 10)]
+                        ),
+                        StreamBuilder(stream: _detailsStream.stream, builder: (builder, snapshot) {
+                          return Container();
+                        }),
+                        Divider(),
 
                         Container(
                             padding: const EdgeInsets.all(10),

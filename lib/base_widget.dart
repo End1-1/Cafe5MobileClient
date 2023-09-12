@@ -104,18 +104,16 @@ abstract class BaseWidgetState <T extends StatefulWidget> extends State<T> imple
               child: Text(tr("Yes")),
               onPressed: () {
                 Navigator.of(context).pop();
-                if (yes != null) {
                   yes();
-                }
+
               },
             ),
             TextButton(
               child: Text(tr("No")),
               onPressed: () {
                 Navigator.of(context).pop();
-                if (no != null) {
                   no();
-                }
+
               },
             )
           ],
