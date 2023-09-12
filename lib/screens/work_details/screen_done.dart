@@ -7,6 +7,7 @@ import 'package:cafe5_mobile_client/screens/structs/workdetails.dart';
 import 'package:cafe5_mobile_client/screens/work_details/model.dart';
 import 'package:cafe5_mobile_client/translator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class WorkDetailsScreenDone extends StatelessWidget {
   late final WorkDetailsModel model;
@@ -122,222 +123,262 @@ class WorkDetailsScreenDone extends StatelessWidget {
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_34p == e.f_34d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_34',
+                            'f_qty': e.f_34p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '34', e.f_34p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_34',
-                    //       'f_qty': e.f_34p,
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_34p}', style: e.f_34p == e.f_34d ? ts2 : model.completeListExists(e.f_color, '34') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_36p == e.f_36d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_36',
+                            'f_qty': e.f_36p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '36', e.f_36p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_36',
-                    //       'f_qty': e.f_36p,
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_36p}', style: e.f_36p == e.f_36d ? ts2 : model.completeListExists(e.f_color, '36') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_38p == e.f_38d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_38',
+                            'f_qty': e.f_38p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '38', e.f_38p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_38',
-                    //       'f_qty': e.f_38p
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_38p}', style: e.f_38p == e.f_38d ? ts2 : model.completeListExists(e.f_color, '38') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_40p == e.f_40d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_40',
+                            'f_qty': e.f_40p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '40', e.f_40p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_40',
-                    //       'f_qty': e.f_40p,
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_40p}', style: e.f_40p == e.f_40d ? ts2 : model.completeListExists(e.f_color, '40') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_42p == e.f_42d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_42',
+                            'f_qty': e.f_42p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '42', e.f_42p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_42',
-                    //       'f_qty': e.f_42p,
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_42p}', style: e.f_42p == e.f_42d ? ts2 : model.completeListExists(e.f_color, '42') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_44p == e.f_44d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_44',
+                            'f_qty': e.f_44p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '44', e.f_44p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_44',
-                    //       'f_qty': e.f_44p,
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_44p}', style: e.f_44p == e.f_44d ? ts2 : model.completeListExists(e.f_color, '44') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_46p == e.f_46d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_46',
+                            'f_qty': e.f_46p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '46', e.f_46p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_46',
-                    //       'f_qty': e.f_46p,
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_46p}', style: e.f_46p == e.f_46d ? ts2 : model.completeListExists(e.f_color, '46') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_48p == e.f_48d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_48',
+                            'f_qty': e.f_48p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '48', e.f_48p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_48',
-                    //       'f_qty': e.f_48p,
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_48p}', style: e.f_48p == e.f_48d ? ts2 : model.completeListExists(e.f_color, '48') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_50p == e.f_50d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_50',
+                            'f_qty': e.f_50p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '50', e.f_50p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_50',
-                    //       'f_qty': e.f_50p,
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_50p}', style: e.f_50p == e.f_50d ? ts2 : model.completeListExists(e.f_color, '50') ? ts3 : ts1))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     if (e.f_52p == e.f_52d) {
+                      AppDialog.question(context, tr('Rollback?')).then((value) {
+                        if (value != null) {
+                          HttpQuery().request({
+                            'query': HttpQuery.qWorkDetailsUpdateUnDone,
+                            'f_id': e.f_id,
+                            'f_taskid': model.task_id,
+                            'f_processid': model.process,
+                            'f_color': e.f_color,
+                            'f_field': 'f_52',
+                            'f_qty': e.f_52p,
+                          }).then((value) {
+                            if (value[HttpQuery.kStatus] != HttpQuery.hrOk) {
+                              AppDialog.error(context, value[HttpQuery.kData]);
+                              return;
+                            }
+                            model.getWorksDone();
+                          });
+                        }
+                      });
                       return;
                     }
                     model.completeListAddRemove(e.f_id, e.f_color, '52', e.f_52p);
-                    // AppDialog.question(context, tr('Execute?')).then((value) {
-                    //   if (value != null) {
-                    //     HttpQuery().request({
-                    //       'query': HttpQuery.qWorkDetailsUpdateDone,
-                    //       'f_id': e.f_id,
-                    //       'f_taskid': model.task_id,
-                    //       'f_processid': model.process,
-                    //       'f_color': e.f_color,
-                    //       'f_field': 'f_52',
-                    //       'f_qty': e.f_52p
-                    //     }).then((value) {
-                    //       model.getWorksDone();
-                    //     });
-                    //   }
-                    // });
                   }, child: Text('${e.f_52p}', style: e.f_52p == e.f_52d ? ts2 : model.completeListExists(e.f_color, '52') ? ts3 : ts1))),
 
                 ],)

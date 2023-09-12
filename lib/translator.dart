@@ -36,7 +36,9 @@ final Map<String, String> vals = {
   'task': 'Առաջադրանք',
   'list of task': 'Առաջադրանքներ',
   'teamlead':'Ղեկավար',
-  'employee':'Աշխատող'
+  'employee':'Աշխատող',
+  'rollback': 'Հետ բերել',
+  'execute?': 'Կատարված է՞'
 };
 
 String tr(String s) {
