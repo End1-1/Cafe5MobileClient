@@ -477,6 +477,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                                   MaterialPageRoute(
                                       builder: (builder) => WorkDetailsScreen(_product!.name, 0, widget.taskId,
                                           ))).then((value) {
+                                _loadTask(widget.taskId);
 
                               });
                             }, child: Image.asset(

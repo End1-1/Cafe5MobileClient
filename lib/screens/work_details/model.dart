@@ -90,4 +90,8 @@ class WorkDetailsModel {
     getWorksDone();
   }
 
+  Future<void> comleteRow(String key, List<String> value) async {
+
+  }
+
 }
