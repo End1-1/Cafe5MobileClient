@@ -71,7 +71,24 @@ class WorkDetailsModel {
     return completeList[color]!.contains(size);
   }
 
-  void completeListAddRemove(int id, String color, String size, int qty) {
+  Future<void> completeListAddRemove(int id, String color, String size, int qty) async {
+    if (id == 0) {
+      final result = await HttpQuery().request({
+        'query': HttpQuery.qWorkDetailsUpdateDone,
+        'f_id': 0,
+        'f_taskid': task_id,
+        'f_processid': process,
+        'f_color': color,
+        'f_field': 'f_${size}',
+        'f_qty': 0,
+      });
+      if (result[HttpQuery.kStatus] == HttpQuery.hrOk) {
+        id = int.tryParse(result[HttpQuery.kData].toString()) ?? 0;
+      }
+    }
+    if (id == 0) {
+      return;
+    }
     listId[color] = id;
     if (!idQty.containsKey(id)) {
       idQty[id] = {};

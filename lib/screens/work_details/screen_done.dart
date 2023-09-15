@@ -75,11 +75,17 @@ class WorkDetailsScreenDone extends StatelessWidget {
                             await AppDialog.question(context, tr('Execute?'))
                                 .then((value) async {
                               if (value != null) {
-                                List<String> keys = model.completeList.keys.toList();
+                                List<String> keys =
+                                    model.completeList.keys.toList();
                                 for (final key in keys) {
                                   List<String> value = model.completeList[key]!;
                                   for (final e in value) {
-                                     await HttpQuery().request({
+                                    if (model.listId[key] == 0) {
+                                      AppDialog.error(
+                                          context, tr('Incorrect data'));
+                                      return;
+                                    }
+                                    await HttpQuery().request({
                                       'query': HttpQuery.qWorkDetailsUpdateDone,
                                       'f_id': model.listId[key]!,
                                       'f_taskid': model.task_id,
@@ -197,7 +203,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                      tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                        model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_34',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_34p == e.f_34d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -229,10 +256,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '34', e.f_34p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '34',
+                                                e.f_34p);
                                           },
-                                          child: Text('${e.f_34p}',
+                                          child: Text('${model.task_id == 53 ? e.f_34d : e.f_34p}',
                                               style: e.f_34p == e.f_34d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -244,7 +274,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_36',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_36p == e.f_36d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -276,10 +327,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '36', e.f_36p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '36',
+                                                e.f_36p);
                                           },
-                                          child: Text('${e.f_36p}',
+                                          child: Text('${model.task_id == 53 ? e.f_36d : e.f_36p}',
                                               style: e.f_36p == e.f_36d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -291,7 +345,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_38',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_38p == e.f_38d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -323,10 +398,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '38', e.f_38p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '38',
+                                                e.f_38p);
                                           },
-                                          child: Text('${e.f_38p}',
+                                          child: Text('${model.task_id == 53 ? e.f_38d : e.f_38p}',
                                               style: e.f_38p == e.f_38d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -338,7 +416,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_40',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_40p == e.f_40d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -370,10 +469,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '40', e.f_40p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '40',
+                                                e.f_40p);
                                           },
-                                          child: Text('${e.f_40p}',
+                                          child: Text('${model.task_id == 53 ? e.f_40d : e.f_40p}',
                                               style: e.f_40p == e.f_40d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -385,7 +487,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_42',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_42p == e.f_42d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -417,10 +540,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '42', e.f_42p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '42',
+                                                e.f_42p);
                                           },
-                                          child: Text('${e.f_42p}',
+                                          child: Text('${model.task_id == 53 ? e.f_42d : e.f_42p}',
                                               style: e.f_42p == e.f_42d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -432,7 +558,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_44',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_44p == e.f_44d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -464,10 +611,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '44', e.f_44p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '44',
+                                                e.f_44p);
                                           },
-                                          child: Text('${e.f_44p}',
+                                          child: Text('${model.task_id == 53 ? e.f_44d : e.f_44p}',
                                               style: e.f_44p == e.f_44d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -479,7 +629,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_46',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_46p == e.f_46d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -511,10 +682,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '46', e.f_46p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '46',
+                                                e.f_46p);
                                           },
-                                          child: Text('${e.f_46p}',
+                                          child: Text('${model.task_id == 53 ? e.f_46d : e.f_46p}',
                                               style: e.f_46p == e.f_46d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -526,7 +700,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_48',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_48p == e.f_48d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -558,10 +753,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '48', e.f_48p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '48',
+                                                e.f_48p);
                                           },
-                                          child: Text('${e.f_48p}',
+                                          child: Text('${model.task_id == 53 ? e.f_48d : e.f_48p}',
                                               style: e.f_48p == e.f_48d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -573,7 +771,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_50',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_50p == e.f_50d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -605,10 +824,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '50', e.f_50p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '50',
+                                                e.f_50p);
                                           },
-                                          child: Text('${e.f_50p}',
+                                          child: Text('${model.task_id == 53 ? e.f_50d : e.f_50p}',
                                               style: e.f_50p == e.f_50d
                                                   ? ts2
                                                   : model.completeListExists(
@@ -620,7 +842,28 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           const EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       width: 50,
                                       child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            if (model.task_id == 53) {
+                                              AppDialog.getInt(context,
+                                                  tr('Set quantity'))
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  HttpQuery().request({
+                                                    'query': HttpQuery
+                                                        .qWorkDetailsUpdateDone,
+                                                    'f_id': e.f_id,
+                                                    'f_taskid': model.task_id,
+                                                    'f_processid':
+                                                    model.process,
+                                                    'f_color': e.f_color,
+                                                    'f_field': 'f_52',
+                                                    'f_qty': value,
+                                                  }).then((value) =>
+                                                      model.getWorksDone());
+                                                }
+                                              });
+                                              return;
+                                            }
                                             if (e.f_52p == e.f_52d) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
@@ -652,10 +895,13 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            model.completeListAddRemove(e.f_id,
-                                                e.f_color, '52', e.f_52p);
+                                            await model.completeListAddRemove(
+                                                e.f_id,
+                                                e.f_color,
+                                                '52',
+                                                e.f_52p);
                                           },
-                                          child: Text('${e.f_52p}',
+                                          child: Text('${model.task_id == 53 ? e.f_52d : e.f_52p}',
                                               style: e.f_52p == e.f_52d
                                                   ? ts2
                                                   : model.completeListExists(

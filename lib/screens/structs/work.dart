@@ -10,9 +10,10 @@ class Work with _$Work {
       {required int f_goal,
       required int f_id,
       required int f_laststep,
+      required int f_taskid,
       required double f_price,
       required int f_process,
-        required String f_productname,
+      required String f_productname,
       required String f_processname,
       required int f_qty,
       required int f_ready}) = _Work;

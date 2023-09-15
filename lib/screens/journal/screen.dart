@@ -220,7 +220,7 @@ class JournalScreen extends StatelessWidget {
                   MaterialPageRoute(
                       builder: (builder) => WorkDetailsScreenDone(
                           '${model.task.f_name} ${w.f_processname}',
-                          w.f_id, model.task.f_id))).then((value) {
+                          w.f_id, w.f_taskid))).then((value) {
                 model.getTask();
               });
 
