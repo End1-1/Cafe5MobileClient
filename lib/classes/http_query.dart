@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class HttpQuery {
-  static const server = "37.252.66.86";
-  //static const server = "192.168.88.42";
+  //static const server = "37.252.66.86";
+  static const server = "192.168.88.42";
   static const port = 10002;
   static const hrFail = 0;
   static const hrOk = 1;
