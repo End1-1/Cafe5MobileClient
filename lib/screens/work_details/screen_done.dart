@@ -225,7 +225,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_34p == e.f_34d) {
+                                            if (e.f_34d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -239,7 +239,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_34',
-                                                    'f_qty': e.f_34p,
+                                                    'f_qty': e.f_34d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -262,8 +262,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '34',
                                                 e.f_34p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_34d : e.f_34p}',
-                                              style: e.f_34p == e.f_34d
+                                          child: Text('${model.task_id == 53 ? e.f_34d : e.f_34d > 0 ? e.f_34d : e.f_34p}',
+                                              style: e.f_34d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '34')
@@ -296,7 +296,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_36p == e.f_36d) {
+                                            if (e.f_36d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -310,7 +310,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_36',
-                                                    'f_qty': e.f_36p,
+                                                    'f_qty': e.f_36d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -333,8 +333,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '36',
                                                 e.f_36p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_36d : e.f_36p}',
-                                              style: e.f_36p == e.f_36d
+                                          child: Text('${model.task_id == 53 ?  e.f_36d : e.f_36d > 0 ? e.f_36d : e.f_36p}',
+                                              style: e.f_36d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '36')
@@ -367,7 +367,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_38p == e.f_38d) {
+                                            if (e.f_38d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -381,7 +381,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_38',
-                                                    'f_qty': e.f_38p,
+                                                    'f_qty': e.f_38d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -404,8 +404,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '38',
                                                 e.f_38p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_38d : e.f_38p}',
-                                              style: e.f_38p == e.f_38d
+                                          child: Text('${model.task_id == 53 ? e.f_38d : e.f_38d > 0 ? e.f_38d : e.f_38p}',
+                                              style: e.f_38d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '38')
@@ -438,7 +438,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_40p == e.f_40d) {
+                                            if (e.f_40d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -452,7 +452,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_40',
-                                                    'f_qty': e.f_40p,
+                                                    'f_qty': e.f_40d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -475,8 +475,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '40',
                                                 e.f_40p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_40d : e.f_40p}',
-                                              style: e.f_40p == e.f_40d
+                                          child: Text('${model.task_id == 53 ? e.f_40d : e.f_40d > 0 ? e.f_40d : e.f_40p}',
+                                              style: e.f_40d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '40')
@@ -509,7 +509,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_42p == e.f_42d) {
+                                            if (e.f_42d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -523,7 +523,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_42',
-                                                    'f_qty': e.f_42p,
+                                                    'f_qty': e.f_42d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -546,8 +546,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '42',
                                                 e.f_42p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_42d : e.f_42p}',
-                                              style: e.f_42p == e.f_42d
+                                          child: Text('${model.task_id == 53 ? e.f_42d : e.f_42d > 0 ? e.f_42d : e.f_42p}',
+                                              style: e.f_42d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '42')
@@ -580,7 +580,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_44p == e.f_44d) {
+                                            if (e.f_44d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -594,7 +594,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_44',
-                                                    'f_qty': e.f_44p,
+                                                    'f_qty': e.f_44d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -617,8 +617,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '44',
                                                 e.f_44p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_44d : e.f_44p}',
-                                              style: e.f_44p == e.f_44d
+                                          child: Text('${model.task_id == 53 ? e.f_44d : e.f_44d > 0 ? e.f_44d : e.f_44p}',
+                                              style: e.f_44d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '44')
@@ -651,7 +651,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_46p == e.f_46d) {
+                                            if (e.f_46d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -665,7 +665,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_46',
-                                                    'f_qty': e.f_46p,
+                                                    'f_qty': e.f_46d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -688,8 +688,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '46',
                                                 e.f_46p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_46d : e.f_46p}',
-                                              style: e.f_46p == e.f_46d
+                                          child: Text('${model.task_id == 53 ? e.f_46d : e.f_46d > 0 ? e.f_46d : e.f_46p}',
+                                              style: e.f_46d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '46')
@@ -722,7 +722,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_48p == e.f_48d) {
+                                            if (e.f_48d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -736,7 +736,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_48',
-                                                    'f_qty': e.f_48p,
+                                                    'f_qty': e.f_48d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -759,8 +759,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '48',
                                                 e.f_48p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_48d : e.f_48p}',
-                                              style: e.f_48p == e.f_48d
+                                          child: Text('${model.task_id == 53 ? e.f_48d : e.f_48d > 0 ? e.f_48d : e.f_48p}',
+                                              style: e.f_48d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '48')
@@ -793,7 +793,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_50p == e.f_50d) {
+                                            if (e.f_50d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -807,7 +807,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_50',
-                                                    'f_qty': e.f_50p,
+                                                    'f_qty': e.f_50d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -830,8 +830,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '50',
                                                 e.f_50p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_50d : e.f_50p}',
-                                              style: e.f_50p == e.f_50d
+                                          child: Text('${model.task_id == 53 ? e.f_50d : e.f_50d > 0 ? e.f_50d : e.f_50p}',
+                                              style: e.f_50d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '50')
@@ -864,7 +864,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               });
                                               return;
                                             }
-                                            if (e.f_52p == e.f_52d) {
+                                            if (e.f_52d > 0) {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
@@ -878,7 +878,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                         model.process,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_52',
-                                                    'f_qty': e.f_52p,
+                                                    'f_qty': e.f_52d,
                                                   }).then((value) {
                                                     if (value[HttpQuery
                                                             .kStatus] !=
@@ -901,8 +901,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                 '52',
                                                 e.f_52p);
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_52d : e.f_52p}',
-                                              style: e.f_52p == e.f_52d
+                                          child: Text('${model.task_id == 53 ? e.f_52d : e.f_52d > 0 ? e.f_52d : e.f_52p}',
+                                              style: e.f_52d > 0
                                                   ? ts2
                                                   : model.completeListExists(
                                                           e.f_color, '52')

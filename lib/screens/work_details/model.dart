@@ -72,6 +72,7 @@ class WorkDetailsModel {
   }
 
   Future<void> completeListAddRemove(int id, String color, String size, int qty) async {
+    listController.add(null);
     if (id == 0) {
       final result = await HttpQuery().request({
         'query': HttpQuery.qWorkDetailsUpdateDone,
