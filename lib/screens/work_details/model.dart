@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 class WorkDetailsModel {
   String work;
   int process;
+  int daily_id;
   int task_id;
   String err = '';
   final listController = StreamController();
@@ -15,7 +16,7 @@ class WorkDetailsModel {
   final Map<String, int> listId = {};
   final Map<int, Map<String, int>> idQty = {};
 
-  WorkDetailsModel(this.work, this.process, this.task_id) {
+  WorkDetailsModel(this.work, this.process, this.task_id, this.daily_id) {
     if (process == 0) {
       getWorks();
     } else {
@@ -50,6 +51,7 @@ class WorkDetailsModel {
       'query': HttpQuery.qWorkDetailsDone,
       'f_task': task_id,
       'f_process': process,
+      'f_dailyid': daily_id,
     });
     if (result[HttpQuery.kStatus] != HttpQuery.hrOk) {
       err = result[HttpQuery.kData];

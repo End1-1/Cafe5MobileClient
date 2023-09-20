@@ -12,7 +12,7 @@ class WorkDetailsScreen extends StatelessWidget {
   late final WorkDetailsModel model;
 
   WorkDetailsScreen(String work, int process, int task_id, {super.key}) {
-    model = WorkDetailsModel(work, process, task_id);
+    model = WorkDetailsModel(work, process, task_id, 0);
   }
 
   @override
