@@ -102,7 +102,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_34p}', style: ts))),
+                  }, child: Text('${e.f_34p + e.f_34}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -118,7 +118,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_36p}', style: ts))),
+                  }, child: Text('${e.f_36p + e.f_36}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -134,7 +134,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_38p}', style: ts))),
+                  }, child: Text('${e.f_38p + e.f_38}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -150,7 +150,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_40p}', style: ts))),
+                  }, child: Text('${e.f_40p + e.f_40}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -165,7 +165,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_42p}', style: ts))),
+                  }, child: Text('${e.f_42p + e.f_42}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -181,7 +181,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_44p}', style: ts))),
+                  }, child: Text('${e.f_44p + e.f_44}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -197,7 +197,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_46p}', style: ts))),
+                  }, child: Text('${e.f_46p + e.f_46}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -213,7 +213,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_48p}', style: ts))),
+                  }, child: Text('${e.f_48p + e.f_48}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -229,7 +229,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_50p}', style: ts))),
+                  }, child: Text('${e.f_50p + e.f_50}', style: ts))),
 
                   Container(margin: const EdgeInsets.fromLTRB(5, 5, 5, 5), width: 50, child: InkWell(onTap:(){
                     AppDialog.getInt(context, tr('Set quantity')).then((value) {
@@ -245,7 +245,7 @@ class WorkDetailsScreen extends StatelessWidget {
                         });
                       }
                     });
-                  }, child: Text('${e.f_52p}', style: ts))),
+                  }, child: Text('${e.f_52p + e.f_52}', style: ts))),
 
                   InkWell(
                       onTap: () {
