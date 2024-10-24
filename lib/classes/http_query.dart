@@ -36,7 +36,7 @@ class HttpQuery {
   static const qWorkDetailsUpdateDoneArray2 = 20;
 
   final String route;
-  HttpQuery(this.route);
+  HttpQuery({this.route = 'index.php'});
 
   Future<Map<String, dynamic>> request(Map<String, Object?> inData) async {
     Map<String, Object?> outData = {};
@@ -44,7 +44,7 @@ class HttpQuery {
     print('request: $strBody');
     try {
       var response = await http
-          .post(Uri.https('aws.elina.am', route),
+          .post(Uri.https('aws.elina.am', '/engine/elinaworkshop/$route.php'),
           headers: {
             'Content-Type': 'application/json',
             'Content-Length': '${utf8.encode(strBody).length}'
