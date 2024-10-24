@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 class WorkDetailsScreenDone extends StatelessWidget {
   late final WorkDetailsModel model;
 
-  WorkDetailsScreenDone(String work, int process, int task_id, int daily_id, {super.key}) {
+  WorkDetailsScreenDone(String work, int process, int task_id, int daily_id,
+      {super.key}) {
     model = WorkDetailsModel(work, process, task_id, daily_id);
   }
 
@@ -22,7 +23,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
     const ts3 = TextStyle(
         fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple);
     return AppHeader(
-        '${model.work}',
+        model.work,
         SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SingleChildScrollView(
@@ -75,32 +76,59 @@ class WorkDetailsScreenDone extends StatelessWidget {
                             await AppDialog.question(context, tr('Execute?'))
                                 .then((value) async {
                               if (value != null) {
+                                final List<Map<String, dynamic>> arr = [];
                                 List<String> keys =
                                     model.completeList.keys.toList();
                                 for (final key in keys) {
                                   List<String> value = model.completeList[key]!;
                                   for (final e in value) {
-                                    if (model.listId[key] == 0) {
-                                      AppDialog.error(
-                                          context, tr('Incorrect data'));
-                                      return;
-                                    }
-                                    await HttpQuery().request({
+                                    arr.add({
                                       'query': HttpQuery.qWorkDetailsUpdateDone,
                                       'f_id': model.listId[key]!,
                                       'f_taskid': model.task_id,
                                       'f_processid': model.process,
+                                      'f_dailyid': model.daily_id,
                                       'f_color': key,
                                       'f_field': 'f_${e}',
                                       'f_qty':
-                                          model.idQty[model.listId[key]!]![e],
+                                      model.idQty[model.listId[key]!]![e],
                                     });
+
+                                    // if (model.listId[key] == 0) {
+                                    //   AppDialog.error(
+                                    //       context, tr('Incorrect data'));
+                                    //   return;
+                                    // }
+                                    // await HttpQuery().request({
+                                    //   'query': HttpQuery.qWorkDetailsUpdateDone,
+                                    //   'f_id': model.listId[key]!,
+                                    //   'f_taskid': model.task_id,
+                                    //   'f_processid': model.process,
+                                    //   'f_dailyid': model.daily_id,
+                                    //   'f_color': key,
+                                    //   'f_field': 'f_${e}',
+                                    //   'f_qty':
+                                    //       model.idQty[model.listId[key]!]![e],
+                                    // });
                                   }
                                 }
+                                // model.idQty.clear();
+                                // model.listId.clear();
+                                // model.completeList.clear();
+                                // model.getWorksDone();
+                                model.progressPending++;
+                                model.progressController.add(model.progressPending);
+                                await HttpQuery().request({
+                                  'query': HttpQuery.qWorkDetailsUpdateDoneArray2,
+                                  'arr': arr
+                                });
                                 model.idQty.clear();
                                 model.listId.clear();
                                 model.completeList.clear();
                                 model.getWorksDone();
+                                model.progressPending++;
+                                model.progressController.add(model.progressPending);
+                                return;
                               }
                             });
                           },
@@ -108,7 +136,16 @@ class WorkDetailsScreenDone extends StatelessWidget {
                             'images/edit.png',
                             width: 30,
                             height: 30,
-                          ))
+                          )),
+                      StreamBuilder(stream: model.progressController.stream, builder: (builder, snapshot) {
+                        if (model.progressPending > 0) {
+                          return Row(children:[const CircularProgressIndicator(),
+                          const SizedBox(width: 5,),
+                          Text('${model.progressPending}')
+                          ]);
+                        }
+                        return Container();
+                      }),
                     ],
                   ),
                   StreamBuilder(
@@ -216,6 +253,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_34',
                                                     'f_qty': value,
@@ -229,7 +267,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -237,6 +275,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_34',
                                                     'f_qty': e.f_34c,
@@ -257,13 +296,15 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_34c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '34',
-                                                e.f_34p - e.f_34d);}
+                                              model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '34',
+                                                  e.f_34p - e.f_34d);
+                                            }
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_34c : e.f_34c > 0 ? e.f_34c : e.f_34p - e.f_34d}',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_34c : e.f_34c > 0 ? e.f_34c : e.f_34p - e.f_34d}',
                                               style: e.f_34c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -278,7 +319,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -287,7 +328,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_36',
                                                     'f_qty': value,
@@ -301,7 +343,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -309,6 +351,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_36',
                                                     'f_qty': e.f_36c,
@@ -329,13 +372,15 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_36c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '36',
-                                                e.f_36p  - e.f_36d); }
+                                              await model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '36',
+                                                  e.f_36p - e.f_36d);
+                                            }
                                           },
-                                          child: Text('${model.task_id == 53 ?  e.f_36d : e.f_36c > 0 ? e.f_36c : e.f_36p  - e.f_36d}',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_36d : e.f_36c > 0 ? e.f_36c : e.f_36p - e.f_36d}',
                                               style: e.f_36c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -350,7 +395,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -359,7 +404,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_38',
                                                     'f_qty': value,
@@ -373,7 +419,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -381,6 +427,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_38',
                                                     'f_qty': e.f_38c,
@@ -401,13 +448,15 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_38c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '38',
-                                                e.f_38p - e.f_38d);}
+                                              await model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '38',
+                                                  e.f_38p - e.f_38d);
+                                            }
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_38d : e.f_38c > 0 ? e.f_38c : e.f_38p - e.f_38d}',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_38d : e.f_38c > 0 ? e.f_38c : e.f_38p - e.f_38d}',
                                               style: e.f_38c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -422,7 +471,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -431,7 +480,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_40',
                                                     'f_qty': value,
@@ -445,7 +495,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -453,6 +503,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_40',
                                                     'f_qty': e.f_40c,
@@ -473,13 +524,15 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_40c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '40',
-                                                e.f_40p - e.f_40d); }
+                                              await model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '40',
+                                                  e.f_40p - e.f_40d);
+                                            }
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_40d : e.f_40c > 0 ? e.f_40c : e.f_40p - e.f_40d}',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_40d : e.f_40c > 0 ? e.f_40c : e.f_40p - e.f_40d}',
                                               style: e.f_40c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -494,7 +547,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -503,7 +556,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_42',
                                                     'f_qty': value,
@@ -517,7 +571,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -525,6 +579,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_42',
                                                     'f_qty': e.f_42c,
@@ -545,13 +601,15 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_42c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '42',
-                                                e.f_42p  - e.f_42d);}
+                                              await model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '42',
+                                                  e.f_42p - e.f_42d);
+                                            }
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_42d : e.f_42c > 0 ? e.f_42c : e.f_42p - e.f_42d}',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_42d : e.f_42c > 0 ? e.f_42c : e.f_42p - e.f_42d}',
                                               style: e.f_42c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -566,7 +624,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -575,7 +633,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_44',
                                                     'f_qty': value,
@@ -589,7 +648,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -597,6 +656,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_44',
                                                     'f_qty': e.f_44c,
@@ -617,13 +677,15 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_44c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '44',
-                                                e.f_44p - e.f_44d);}
+                                              await model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '44',
+                                                  e.f_44p - e.f_44d);
+                                            }
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_44d : e.f_44c > 0 ? e.f_44c : e.f_44p - e.f_44d }',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_44d : e.f_44c > 0 ? e.f_44c : e.f_44p - e.f_44d}',
                                               style: e.f_44c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -638,7 +700,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -647,7 +709,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_46',
                                                     'f_qty': value,
@@ -661,7 +724,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -669,6 +732,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_46',
                                                     'f_qty': e.f_46c,
@@ -696,7 +760,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                   e.f_46p - e.f_46d);
                                             }
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_46d : e.f_46c > 0 ? e.f_46c : e.f_46p - e.f_46d}',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_46d : e.f_46c > 0 ? e.f_46c : e.f_46p - e.f_46d}',
                                               style: e.f_46c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -711,7 +776,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -720,7 +785,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_48',
                                                     'f_qty': value,
@@ -734,7 +800,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -742,6 +808,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_48',
                                                     'f_qty': e.f_48c,
@@ -762,13 +829,15 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_48c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '48',
-                                                e.f_48p - e.f_48d);}
+                                              await model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '48',
+                                                  e.f_48p - e.f_48d);
+                                            }
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_48d : e.f_48c > 0 ? e.f_48c : e.f_48p - e.f_48d}',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_48d : e.f_48c > 0 ? e.f_48c : e.f_48p - e.f_48d}',
                                               style: e.f_48c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -783,7 +852,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -792,7 +861,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_50',
                                                     'f_qty': value,
@@ -806,7 +876,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -814,6 +884,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_50',
                                                     'f_qty': e.f_50c,
@@ -834,13 +905,15 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_50c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '50',
-                                                e.f_50p - e.f_50d);}
+                                              await model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '50',
+                                                  e.f_50p - e.f_50d);
+                                            }
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_50d : e.f_50c > 0 ? e.f_50c : e.f_50p - e.f_50d }',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_50d : e.f_50c > 0 ? e.f_50c : e.f_50p - e.f_50d}',
                                               style: e.f_50c > 0
                                                   ? ts2
                                                   : model.completeListExists(
@@ -855,7 +928,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                           onTap: () async {
                                             if (model.task_id == 53) {
                                               AppDialog.getInt(context,
-                                                  tr('Set quantity'))
+                                                      tr('Set quantity'))
                                                   .then((value) {
                                                 if (value != null) {
                                                   HttpQuery().request({
@@ -864,7 +937,8 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_id': e.f_id,
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
-                                                    model.process,
+                                                        model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_52',
                                                     'f_qty': value,
@@ -878,7 +952,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               AppDialog.question(
                                                       context, tr('Rollback?'))
                                                   .then((value) {
-                                                if (value != null) {
+                                                if (value ?? false) {
                                                   HttpQuery().request({
                                                     'query': HttpQuery
                                                         .qWorkDetailsUpdateUnDone,
@@ -886,6 +960,7 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                                     'f_taskid': model.task_id,
                                                     'f_processid':
                                                         model.process,
+                                                    'f_dailyid': model.daily_id,
                                                     'f_color': e.f_color,
                                                     'f_field': 'f_52',
                                                     'f_qty': e.f_52c,
@@ -906,13 +981,16 @@ class WorkDetailsScreenDone extends StatelessWidget {
                                               return;
                                             }
                                             if (e.f_52c == 0) {
-                                            await model.completeListAddRemove(
-                                                e.f_id,
-                                                e.f_color,
-                                                '52',
-                                                e.f_52p - e.f_52d);};
+                                              await model.completeListAddRemove(
+                                                  e.f_id,
+                                                  e.f_color,
+                                                  '52',
+                                                  e.f_52p - e.f_52d);
+                                            }
+                                            ;
                                           },
-                                          child: Text('${model.task_id == 53 ? e.f_52d : e.f_52c > 0 ? e.f_52c : e.f_52p - e.f_52d}',
+                                          child: Text(
+                                              '${model.task_id == 53 ? e.f_52d : e.f_52c > 0 ? e.f_52c : e.f_52p - e.f_52d}',
                                               style: e.f_52c > 0
                                                   ? ts2
                                                   : model.completeListExists(

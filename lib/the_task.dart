@@ -116,8 +116,8 @@ class TheTaskState extends BaseWidgetState<TheTask> {
               _processTable.readFromSocketMessage(m);
               double d1 = 0, d2 = 0;
               for (int i = 0; i < _processTable.rowCount; i++) {
-                d1 += _processTable.getRawData(i, 3);
-                d2 += _processTable.getRawData(i, 4);
+                d1 += _processTable.getRawData(i, 5);
+                d2 += _processTable.getRawData(i, 6);
               }
               _totalpercent = 100 * (d2 / d1);
             });
@@ -515,6 +515,8 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                                               child: Text(tr("Execute")))),
                                     ],
                                   )),
+
+
                         AnimatedContainer(
                             height: _showNotes ? 400 : 0,
                             padding: const EdgeInsets.all(5),
@@ -544,6 +546,8 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                                         child: Text(tr("Save")));
                               },
                             ))),
+
+
                         LinearPercentIndicator(
                           //leaner progress bar
                           animation: true,

@@ -1,17 +1,18 @@
 import 'dart:async';
 
 import 'package:cafe5_mobile_client/classes/http_query.dart';
+import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/screens/structs/employee.dart';
 
 class EmployeeModel {
   final employeeStream = StreamController();
   final teamleadStream = StreamController();
-  Teamlead? teamlead;
+  Teamlead teamlead = Teamlead(f_id: Config.getInt('teamleaderid'), f_name: Config.getString('teamleadername'));
   static final teamLeadList = <Teamlead>[];
   static final employeeList = <Employee>[];
 
   Future<void> getEmployeeList() async {
-    final t = await HttpQuery().request({'query': HttpQuery.qListOfTeamlead});
+    final t = await HttpQuery('/engine/production/employes.php').request({'query': HttpQuery.qListOfTeamlead});
     if (t[HttpQuery.kStatus] != HttpQuery.hrOk) {
       return;
     }

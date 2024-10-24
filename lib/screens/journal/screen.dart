@@ -127,6 +127,38 @@ class JournalScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
+              const Divider(),
+              Row(children: [
+                  SmallButton('images/filter.png', () async {
+                    final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EmployesList(model.date)));
+                    if (result != null) {
+                      model.teamleaderId = result.f_id;
+                      model.teamLeaderName = result.f_name;
+                      model.saveTeamleader();
+                      model.filterTeamleadStream.add(null);
+                      model.getTask();
+                    }
+                  }),
+                Text(tr('Teamleader')),
+                const SizedBox(width: 10),
+                StreamBuilder(stream: model.filterTeamleadStream.stream, builder: (builder, snapshot) {
+                  return Text(model.teamLeaderName);
+                }),
+                Expanded(child: Container()),
+                SmallButton('images/delete.png', () async {
+                    model.teamleaderId = 0;
+                    model.teamLeaderName = '';
+                    model.saveTeamleader();
+                    model.filterTeamleadStream.add(null);
+                    model.getTask();
+                  }
+                ),
+              ],),
+              const SizedBox(height: 10),
+              const Divider(),
               Expanded(
                   child: StreamBuilder(
                       stream: model.tableStream.stream,

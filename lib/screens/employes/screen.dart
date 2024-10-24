@@ -51,7 +51,7 @@ class EmployesList extends StatelessWidget {
                           model.teamleadStream.add(null);
                         }
                       }),
-                      Container(margin: const EdgeInsets.fromLTRB(10, 0, 0, 0), child: model.teamlead == null ? Text(tr('Teamlead')) : Text(model.teamlead!.f_name)),
+                      Container(margin: const EdgeInsets.fromLTRB(10, 0, 0, 0), child: model.teamlead.f_id == 0 ? Text(tr('Teamlead')) : Text(model.teamlead.f_name)),
                       Expanded(child: Container())
                     ],
                   );
@@ -67,8 +67,8 @@ class EmployesList extends StatelessWidget {
                   }
                   final lst = <Employee>[];
                   for (final e in EmployeeModel.employeeList) {
-                    if (model.teamlead != null) {
-                      if (model.teamlead!.f_id != e.f_teamlead) {
+                    if (model.teamlead.f_id > 0) {
+                      if (model.teamlead.f_id != e.f_teamlead) {
                         continue;
                       }
                     }

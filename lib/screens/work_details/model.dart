@@ -10,8 +10,12 @@ class WorkDetailsModel {
   int process;
   int daily_id;
   int task_id;
+  int progressPending = 0;
+  List<Map<String, dynamic>> pendingList = [];
   String err = '';
+  final wdList = <WorkDetailsDone>[];
   final listController = StreamController();
+  final progressController = StreamController();
   final Map<String, List<String>> completeList = {};
   final Map<String, int> listId = {};
   final Map<int, Map<String, int>> idQty = {};
@@ -46,7 +50,7 @@ class WorkDetailsModel {
 
   Future<List<WorkDetailsDone>?> getWorksDone() async {
     err = '';
-    final List<WorkDetailsDone> l = [];
+    wdList.clear();
     final result = await HttpQuery().request({
       'query': HttpQuery.qWorkDetailsDone,
       'f_task': task_id,
@@ -60,10 +64,10 @@ class WorkDetailsModel {
     }
     for (final e in result[HttpQuery.kData]) {
       WorkDetailsDone wd = WorkDetailsDone.fromJson(e);
-      l.add(wd);
+      wdList.add(wd);
     }
-    listController.add(l);
-    return l;
+    listController.add(wdList);
+    return wdList;
   }
 
   bool completeListExists(String color, String size) {
@@ -74,13 +78,28 @@ class WorkDetailsModel {
   }
 
   Future<void> completeListAddRemove(int id, String color, String size, int qty) async {
-    listController.add(null);
+    var pp = false;
     if (id == 0) {
+      for (int i = 0; i  < pendingList.length; i++) {
+        final m = pendingList[i];
+        if (m['a']! == color ) {
+          return;
+        }
+      }
+      pendingList.add({
+        'a': color,
+        'b': size,
+        'c': qty,
+      });
+      pp = true;
+      progressPending++;
+      progressController.add(progressPending);
       final result = await HttpQuery().request({
         'query': HttpQuery.qWorkDetailsUpdateDone,
         'f_id': 0,
         'f_taskid': task_id,
         'f_processid': process,
+        'f_dailyid': daily_id,
         'f_color': color,
         'f_field': 'f_${size}',
         'f_qty': 0,
@@ -88,6 +107,7 @@ class WorkDetailsModel {
       if (result[HttpQuery.kStatus] == HttpQuery.hrOk) {
         id = int.tryParse(result[HttpQuery.kData].toString()) ?? 0;
       }
+      pendingList.removeWhere((e) => e['a'] == color);
     }
     if (id == 0) {
       return;
@@ -107,11 +127,19 @@ class WorkDetailsModel {
         completeList[color]!.add(size);
       }
     }
-    getWorksDone();
+    if (pp) {
+      progressPending--;
+      progressController.add(progressPending);
+    }
+    listController.add(wdList);
   }
 
   Future<void> comleteRow(String key, List<String> value) async {
 
+  }
+
+  Future<void> updateQty() async {
+    progressController.add(++progressPending);
   }
 
 }

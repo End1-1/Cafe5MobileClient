@@ -27,14 +27,7 @@ class NetworkTable {
     selectedIndex = -1;
   }
 
-  void readFromSocketMessage(SocketMessage m) {
-    reset();
-    columnCount = m.getShort();
-    rowCount = m.getInt();
-    readDataTypes(m);
-    readData(m);
-    readStrings(m);
-  }
+
 
   void readDataTypes(SocketMessage m) {
     for (int i = 0; i < columnCount; i++) {

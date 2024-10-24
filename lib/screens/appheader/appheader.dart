@@ -17,9 +17,9 @@ class AppHeader extends StatelessWidget {
                 children: [
               Row(children: [
                 SmallButton("images/back.png", () => Navigator.pop(context)),
-                Container(
+                Expanded(child: Container(
                     margin: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                    child: Text(title)),
+                    child: Text(title, maxLines: 2, ))),
                 Expanded(child: Container())
               ]),
               const Divider(

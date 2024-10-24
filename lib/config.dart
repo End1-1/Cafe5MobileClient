@@ -43,7 +43,7 @@ class Config {
   }
 
   static int getInt(String key) {
-    return _config._preferences.getInt(key)!;
+    return _config._preferences.getInt(key) ?? 0;
   }
 
   static void setDouble(String key, double value) {

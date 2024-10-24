@@ -4,14 +4,11 @@ import 'dart:typed_data';
 import 'package:cafe5_mobile_client/base_widget.dart';
 import 'package:cafe5_mobile_client/translator.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import 'class_employee.dart';
-import 'class_mfprocess.dart';
-import 'client_socket.dart';
 import 'config.dart';
 import 'db.dart';
 

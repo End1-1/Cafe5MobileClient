@@ -1,11 +1,10 @@
 import 'dart:convert';
 
+import 'package:cafe5_mobile_client/config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class HttpQuery {
-  static const server = "37.252.66.86";
-  //static const server = "192.168.88.42";
   static const port = 10002;
   static const hrFail = 0;
   static const hrOk = 1;
@@ -34,6 +33,10 @@ class HttpQuery {
   static const qRemoveWorkDetails = 17;
   static const qWorkDetailsUpdateDoneArray = 18;
   static const qWorkDetailsUpdateUnDone = 19;
+  static const qWorkDetailsUpdateDoneArray2 = 20;
+
+  final String route;
+  HttpQuery(this.route);
 
   Future<Map<String, dynamic>> request(Map<String, Object?> inData) async {
     Map<String, Object?> outData = {};
@@ -41,7 +44,7 @@ class HttpQuery {
     print('request: $strBody');
     try {
       var response = await http
-          .post(Uri.https('$server:$port', '/sqlquery'),
+          .post(Uri.https('aws.elina.am', route),
           headers: {
             'Content-Type': 'application/json',
             'Content-Length': '${utf8.encode(strBody).length}'

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cafe5_mobile_client/classes/http_query.dart';
+import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/screens/structs/employee.dart';
 import 'package:cafe5_mobile_client/screens/structs/task.dart';
 import 'package:cafe5_mobile_client/translator.dart';
@@ -10,12 +11,20 @@ class JournalModel {
   DateTime date = DateTime.now();
   final dateStream = StreamController();
   final filterTaskStream = StreamController<bool?>();
+  final filterTeamleadStream = StreamController();
   final taskStream = StreamController();
   final employeeStream = StreamController();
   final tableStream = StreamController();
   var task = Task(f_id: 0, f_name: tr('Task'), f_product: 0);
   var taskFiltered = false;
   Employee? employee;
+  int teamleaderId = 0;
+  String teamLeaderName = '';
+
+  JournalModel() {
+    teamleaderId = Config.getInt('teamleaderid');
+    teamLeaderName = Config.getString('teamleadername');
+  }
 
   void changeDate(int lr) {
     date = date.add(Duration(days: lr * 1));
@@ -33,7 +42,8 @@ class JournalModel {
       'query': HttpQuery.qListOfWorks,
       'f_worker': employee?.f_id ?? 0,
       'f_task': taskFiltered ? task.f_id : 0,
-      'f_date': DateFormat('dd/MM/yyyy').format(date)
+      'f_date': DateFormat('dd/MM/yyyy').format(date),
+      'f_teamlead': teamleaderId,
     });
     if (result[HttpQuery.kStatus] != HttpQuery.hrOk) {
       tableStream.add(result[HttpQuery.kData] as String);
@@ -48,5 +58,9 @@ class JournalModel {
     getTask();
   }
 
+  void saveTeamleader() {
+    Config.setString('teamleadername', teamLeaderName);
+    Config.setInt('teamleaderid', teamleaderId);
+  }
 
 }

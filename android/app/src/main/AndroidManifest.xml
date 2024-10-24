@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.cafe5_mobile_client">
+    package="com.am.elinamanufacture">
     <uses-permission android:name="android.permission.INTERNET" />
    <application
         android:label="cafe5_mobile_client"
