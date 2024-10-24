@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cafe5_mobile_client/classes/bloc.dart';
 import 'package:cafe5_mobile_client/classes/prefs.dart';
 import 'package:cafe5_mobile_client/config.dart';
@@ -11,7 +9,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  HttpOverrides.global = DevHttpOverrides();
   await Config.init();
   PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
     String appName = packageInfo.appName;
@@ -35,7 +32,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Cafe5MobileClient',
+      title: 'Elina workshop',
       key: Prefs.navigatorKey,
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -44,13 +41,5 @@ class MyApp extends StatelessWidget {
       home: WidgetChooseSettings(),
       
     );
-  }
-}
-
-class DevHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
   }
 }

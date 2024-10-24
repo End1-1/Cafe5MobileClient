@@ -166,9 +166,9 @@ class WidgetHome extends App {
           cells: cells,
           selected: i == _networkTable.selectedIndex,
           onSelectChanged: (val) {
-            setState(() {
+            //UPATE STREAM
               _networkTable.selectedIndex = val! ? i : -1;
-            });
+
           });
       rows.add(dr);
     }

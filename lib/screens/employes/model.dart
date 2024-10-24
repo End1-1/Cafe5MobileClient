@@ -12,7 +12,7 @@ class EmployeeModel {
   static final employeeList = <Employee>[];
 
   Future<void> getEmployeeList() async {
-    final t = await HttpQuery('/engine/production/employes.php').request({'query': HttpQuery.qListOfTeamlead});
+    final t = await HttpQuery(route: '/engine/production/employes.php').request({'query': HttpQuery.qListOfTeamlead});
     if (t[HttpQuery.kStatus] != HttpQuery.hrOk) {
       return;
     }

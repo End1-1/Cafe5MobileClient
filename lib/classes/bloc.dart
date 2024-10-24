@@ -45,7 +45,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   
   void httpQuery(AppEventHttpQuery e) async {
     emit(AppStateLoading());
-    final result = await HttpQuery(e.route).request(e.params);
+    final result = await HttpQuery().request(e.params);
     e.state.error = result['status'] != 1;
     e.state.data = result['data'];
     emit(e.state);

@@ -18,6 +18,7 @@ class TheWorkshops extends App {
   final _autoFocus = FocusNode();
   final _autoKey = GlobalKey();
   late NetworkTable _tw;
+  late NetworkTable _td;
 
   TheWorkshops({super.key});
 

@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:cafe5_mobile_client/app.dart';
 import 'package:cafe5_mobile_client/base_widget.dart';
 import 'package:cafe5_mobile_client/class_outlinedbutton.dart';
 import 'package:cafe5_mobile_client/class_workshop.dart';
+import 'package:cafe5_mobile_client/classes/bloc.dart';
+import 'package:cafe5_mobile_client/classes/prefs.dart';
 import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/screens/work_details/screen.dart';
@@ -12,6 +15,7 @@ import 'package:cafe5_mobile_client/the_task_process.dart';
 import 'package:cafe5_mobile_client/translator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
@@ -19,30 +23,13 @@ import 'class_product.dart';
 import 'class_stages.dart';
 import 'config.dart';
 
-class TheTask extends StatefulWidget {
+class TheTask extends App {
   int taskId;
-
-  TheTask({required this.taskId});
-
-  @override
-  State<StatefulWidget> createState() {
-    return TheTaskState();
-  }
-}
-
-class TheTaskState extends BaseWidgetState<TheTask> {
   final _detailsStream = StreamController();
   List<Product> products = [];
   List<ClassWorkshop> workshop = [];
   List<ClassStage> stages = [];
   bool _showNotes = false;
-  final Map<String, TextEditingController> _notesCotroller = {
-    tr("Color"): TextEditingController(),
-    tr("Width"): TextEditingController(),
-    tr("Height"): TextEditingController(),
-    tr("Length"): TextEditingController()
-  };
-
   late TextEditingController _productQtyTextController;
   NetworkTable _processTable = new NetworkTable();
   Product? _product;
@@ -50,7 +37,6 @@ class TheTaskState extends BaseWidgetState<TheTask> {
   ClassStage? _stage;
   String _dateCreated = DateFormat('dd/MM/yyyy').format(DateTime.now());
   String _timeCreated = DateFormat('HH:mm').format(DateTime.now());
-  bool _dataLoading = false;
   double _totalpercent = 0.0;
   double _outQty = 0.0;
   double _readyQty = 0.0;
@@ -62,6 +48,15 @@ class TheTaskState extends BaseWidgetState<TheTask> {
   TextEditingController _autoTextEditingController2 = TextEditingController();
   FocusNode _autoFocus2 = FocusNode();
   GlobalKey _autoKey2 = GlobalKey();
+  final Map<String, TextEditingController> _notesCotroller = {
+    tr("Color"): TextEditingController(),
+    tr("Width"): TextEditingController(),
+    tr("Height"): TextEditingController(),
+    tr("Length"): TextEditingController()
+  };
+
+  TheTask({required this.taskId});
+
 
   @override
   void handler(Uint8List data) {
@@ -70,12 +65,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
     m.setBuffer(data);
     int dllok = m.getByte();
     switch (dllok) {
-      case 0:
-        sd(tr("Required dll not found on server."));
-        break;
-      case 1:
-        sd(tr("Required dll function not found on server."));
-        break;
+
       case 2:
         int dllop = m.getInt();
         int dlloperror = m.getByte();
@@ -142,38 +132,38 @@ class TheTaskState extends BaseWidgetState<TheTask> {
     }
   }
 
-  @override
-  void initState() {
-    _productQtyTextController = TextEditingController();
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      Db.query('workshop').then((map) {
-        List.generate(map.length, (i) {
-          ClassWorkshop p =
-              ClassWorkshop(id: map[i]['id'], name: map[i]["name"]);
-          workshop.add(p);
-        });
-        Db.query('stages').then((map) {
-          List.generate(map.length, (i) {
-            ClassStage p = ClassStage(id: map[i]['id'], name: map[i]["name"]);
-            stages.add(p);
-          });
-          if (widget.taskId == 0) {
-            Db.query('products').then((map) {
-              List.generate(map.length, (i) {
-                Product p = Product(id: map[i]['id'], name: map[i]["name"]);
-                products.add(p);
-              });
-            });
-          } else {
-            _product = Product(id: 0, name: "...");
-            _loadTask(widget.taskId);
-
-          }
-        });
-      });
-    });
-  }
+  // @override
+  // void initState() {
+  //   _productQtyTextController = TextEditingController();
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+  //     Db.query('workshop').then((map) {
+  //       List.generate(map.length, (i) {
+  //         ClassWorkshop p =
+  //             ClassWorkshop(id: map[i]['id'], name: map[i]["name"]);
+  //         workshop.add(p);
+  //       });
+  //       Db.query('stages').then((map) {
+  //         List.generate(map.length, (i) {
+  //           ClassStage p = ClassStage(id: map[i]['id'], name: map[i]["name"]);
+  //           stages.add(p);
+  //         });
+  //         if (widget.taskId == 0) {
+  //           Db.query('products').then((map) {
+  //             List.generate(map.length, (i) {
+  //               Product p = Product(id: map[i]['id'], name: map[i]["name"]);
+  //               products.add(p);
+  //             });
+  //           });
+  //         } else {
+  //           _product = Product(id: 0, name: "...");
+  //           _loadTask(widget.taskId);
+  //
+  //         }
+  //       });
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +177,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Visibility(
-                            visible: widget.taskId > 0,
+                            visible: taskId > 0,
                             child: Container(
                                 width: double.infinity,
                                 color: Colors.black12,
@@ -198,7 +188,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold)))),
                         Visibility(
-                            visible: widget.taskId == 0,
+                            visible: taskId == 0,
                             child: Container(
                                 color: Colors.black12,
                                 padding: const EdgeInsets.all(5),
@@ -364,28 +354,22 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                                               ));
                                         },
                                         onSelected: (ClassWorkshop p) {
-                                          if (widget.taskId > 0) {
+                                          if (taskId > 0) {
                                             sq(tr("Change workshop?"), () {
-                                              SocketMessage m = SocketMessage(
-                                                  messageId: SocketMessage
-                                                      .messageNumber(),
-                                                  command:
-                                                      SocketMessage.c_dllop);
-                                              m.addString("rwmftasks");
-                                              m.addInt(SocketMessage
-                                                  .op_set_workshop);
-                                              m.addString(Config.getString(
-                                                  key_database_name));
-                                              m.addInt(widget.taskId);
-                                              m.addInt(p.id);
-                                              sendSocketMessage(m);
+                                              httpQuery('/engine/elinaworkshop/index.php', state,
+                                                  {
+                                                    'action': 'rwmtasks',
+                                                    'actionid': SocketMessage.op_set_workshop,
+                                                    'taskid': taskid,
+                                                    'pid': p.id
+                                                  });
                                             }, () {});
                                           } else {
                                             _workshop = p;
                                           }
                                         },
                                       )),
-                                      widget.taskId == 0
+                                      taskId == 0
                                           ? Container()
                                           : ClassOutlinedButton.createImage(() {
                                               _autoTextEditingController2
@@ -454,7 +438,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                                                     hintStyle: TextStyle(
                                                       color: Color(0xFFF00),
                                                     )),
-                                                readOnly: widget.taskId > 0,
+                                                readOnly: taskId > 0,
                                                 keyboardType: TextInputType.number,
                                                 controller: _productQtyTextController,
                                                 inputFormatters: <TextInputFormatter>[
@@ -494,7 +478,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
 
                         Container(
                             padding: const EdgeInsets.all(10),
-                            child: widget.taskId == 0
+                            child: taskId == 0
                                 ? TextButton(
                                     onPressed: _createTask,
                                     child: Text(tr("Create")))
@@ -571,7 +555,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
   }
 
   Widget _listOfProcesses() {
-    if (widget.taskId == 0) {
+    if (taskId == 0) {
       return Text(tr("Please, create new task"));
     }
     if (_processTable.isEmpty()) {
@@ -602,9 +586,9 @@ class TheTaskState extends BaseWidgetState<TheTask> {
           cells: cells,
           selected: i == _processTable.selectedIndex,
           onSelectChanged: (val) {
-            setState(() {
+            //NOTIFY WIDGET
               _processTable.selectedIndex = val! ? i : -1;
-            });
+
           });
       rows.add(dr);
     }
@@ -648,31 +632,22 @@ class TheTaskState extends BaseWidgetState<TheTask> {
       sd(tr("Input right quantity"));
       return;
     }
-    SocketMessage m = SocketMessage(
-        messageId: SocketMessage.messageNumber(),
-        command: SocketMessage.c_dllop);
-    m.addString("rwmftasks");
-    m.addInt(SocketMessage.op_create_task);
-    m.addString(Config.getString(key_database_name));
-    m.addInt(_product!.id);
-    m.addDouble(qty);
-    m.addInt(_workshop!.id);
-    m.addInt(_stage == null ? 0 : _stage!.id);
-    sendSocketMessage(m);
+    httpQuery('/engine/elinaworkshop/index.php', state, {
+      'action': 'rmwtasks',
+      'actionid': SocketMessage.op_create_task,
+      'productid': _product!.id,
+      'qty':qty,
+      'workshopid': _workshop!.id,
+      'stage': _stage ==  null ? 0 : _stage?.id
+    });
   }
 
   void _loadTask(int id) {
-    setState(() {
-      _dataLoading = true;
+    httpQuery('engine/elinaworkshop/index.php', state, {
+      'action':'rwmftasks',
+      'actionid': SocketMessage.op_load_task,
+      'id': id
     });
-    SocketMessage m = SocketMessage(
-        messageId: SocketMessage.messageNumber(),
-        command: SocketMessage.c_dllop);
-    m.addString("rwmftasks");
-    m.addInt(SocketMessage.op_load_task);
-    m.addString(Config.getString(key_database_name));
-    m.addInt(id);
-    sendSocketMessage(m);
   }
 
   void _activateState() {
@@ -681,16 +656,13 @@ class TheTaskState extends BaseWidgetState<TheTask> {
       return;
     }
     sq(tr("Change current state?"), () {
-      SocketMessage m = SocketMessage(
-          messageId: SocketMessage.messageNumber(),
-          command: SocketMessage.c_dllop);
-      m.addString("rwmftasks");
-      m.addInt(SocketMessage.op_set_state);
-      m.addString(Config.getString(key_database_name));
-      m.addInt(widget.taskId);
-      m.addInt(_processTable.getRawData(_processTable.selectedIndex, 0));
-      sendSocketMessage(m);
-    }, () {});
+      httpQuery('/engine/elinaworkshop/index.php', state, {
+        'action': 'rwmfasks',
+        'actionid': SocketMessage.op_set_state,
+        'taskid': taskId,
+        'processid': _processTable.getRawData(_processTable.selectedIndex, 0);
+      });
+
   }
 
   void _executeProcess() {
@@ -699,10 +671,10 @@ class TheTaskState extends BaseWidgetState<TheTask> {
       return;
     }
     Navigator.push(
-        context,
+        prefs.context(),
         MaterialPageRoute(
           builder: (context) => TheTaskProcess(
-              taskId: widget.taskId,
+              taskId: taskId,
               processId:
                   _processTable.getRawData(_processTable.selectedIndex, 0),
               processName:
@@ -711,7 +683,7 @@ class TheTaskState extends BaseWidgetState<TheTask> {
                   .getRawData(_processTable.selectedIndex, 3)
                   .toString())!),
         )).then((value) {
-      _loadTask(widget.taskId);
+      _loadTask(taskId);
     });
   }
 
@@ -743,19 +715,21 @@ class TheTaskState extends BaseWidgetState<TheTask> {
     if (!_showNotes) {
       return;
     }
-    _showNotes = false;
-    SocketMessage m = SocketMessage(
-        messageId: SocketMessage.messageNumber(),
-        command: SocketMessage.c_dllop);
-    m.addString("rwmftasks");
-    m.addInt(SocketMessage.op_save_task_notes);
-    m.addString(Config.getString(key_database_name));
-    m.addInt(widget.taskId);
-    Map<String, String> vals = Map();
-    _notesCotroller.forEach((key, value) {
-      vals[key] = value.text;
-    });
-    m.addString(jsonEncode(vals));
-    sendSocketMessage(m);
+    httpQuery('/engine/elinaworkshop/index.php', AppStateLoginSuccess(),
+        {'pin': _pinController.text, 'method': 1});
+    // _showNotes = false;
+    // SocketMessage m = SocketMessage(
+    //     messageId: SocketMessage.messageNumber(),
+    //     command: SocketMessage.c_dllop);
+    // m.addString("rwmftasks");
+    // m.addInt(SocketMessage.op_save_task_notes);
+    // m.addString(Config.getString(key_database_name));
+    // m.addInt(widget.taskId);
+    // Map<String, String> vals = Map();
+    // _notesCotroller.forEach((key, value) {
+    //   vals[key] = value.text;
+    // });
+    // m.addString(jsonEncode(vals));
+    // sendSocketMessage(m);
   }
 }
