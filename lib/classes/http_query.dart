@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cafe5_mobile_client/classes/prefs.dart';
 import 'package:cafe5_mobile_client/config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -40,7 +41,7 @@ class HttpQuery {
 
   Future<Map<String, dynamic>> request(Map<String, Object?> inData) async {
     Map<String, Object?> outData = {};
-    String strBody = jsonEncode(inData);
+    String strBody = jsonEncode(inData..addAll({'sessionkey': prefs.getString('sessionkey') ?? ''}));
     if (kDebugMode) {
       print('route: /engine/elinaworkshop/$route.php');
       print('request: $strBody');
