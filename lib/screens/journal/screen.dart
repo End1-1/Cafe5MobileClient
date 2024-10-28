@@ -3,6 +3,7 @@ import 'package:cafe5_mobile_client/classes/date_utils.dart';
 import 'package:cafe5_mobile_client/classes/http_query.dart';
 import 'package:cafe5_mobile_client/classes/small_button.dart';
 import 'package:cafe5_mobile_client/classes/text_button.dart';
+import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/screens/employes/screen.dart';
 import 'package:cafe5_mobile_client/screens/employes_of_day/screen.dart';
 import 'package:cafe5_mobile_client/screens/list/screen.dart';
@@ -189,7 +190,14 @@ class JournalScreen extends StatelessWidget {
                                 ]
                               ],
                             )));
-                      }))
+                      })),
+              Align(
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text(Config.getString('appversion')),
+                ),
+              ),
             ])));
   }
 
