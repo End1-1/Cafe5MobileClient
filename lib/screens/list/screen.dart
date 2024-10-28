@@ -34,7 +34,7 @@ class ListScreen extends StatelessWidget {
                         return const Center(child: SizedBox(height: 30, width: 30, child: CircularProgressIndicator()));
                       }
                       if (snapshot.data![HttpQuery.kStatus] != HttpQuery.hrOk) {
-                        return Center(child: Text(snapshot.data![HttpQuery.kData], textAlign: TextAlign.center,));
+                        return Center(child: Text(snapshot.data?[HttpQuery.kData].toString() ?? '??', textAlign: TextAlign.center,));
                       }
                       switch(query) {
                         case HttpQuery.qListOfTasks:

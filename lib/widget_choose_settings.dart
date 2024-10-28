@@ -1,5 +1,6 @@
 import 'package:cafe5_mobile_client/app.dart';
 import 'package:cafe5_mobile_client/classes/bloc.dart';
+import 'package:cafe5_mobile_client/classes/prefs.dart';
 import 'package:cafe5_mobile_client/classes/styles.dart';
 import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/home_page.dart';
@@ -26,6 +27,8 @@ class WidgetChooseSettings extends App {
           //           builder: (BuildContext context) => WidgetHome()),
           //       (route) => false);
           // }
+            prefs.setString('sessionkey', state.data['sessionkey']);
+           // prefs.setString('cashsession', state.data['cashsession']);
             Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
