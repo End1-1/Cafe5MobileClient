@@ -25,6 +25,11 @@ class AppStateLoginSuccess extends AppStateHttpData {}
 
 class AppStateTasks extends AppStateHttpData{}
 
+class AppStateTaskWindows extends AppStateHttpData {
+  final int cmd;
+  AppStateTaskWindows(this.cmd);
+}
+
 class AppEvent extends Equatable{
   @override
   List<Object?> get props => [];
@@ -41,13 +46,14 @@ class AppEventHttpQuery<T extends AppStateHttpData> extends AppEvent {
 class AppBloc extends Bloc<AppEvent, AppState> {
   AppBloc(super.initialState)  {
     on<AppEvent>((event, emit) => emit(AppState()));
+    on<AppEventHttpQuery>((event, emit) => httpQuery(event));
   }
   
   void httpQuery(AppEventHttpQuery e) async {
     emit(AppStateLoading());
-    final result = await HttpQuery().request(e.params);
-    e.state.error = result['status'] != 1;
-    e.state.data = result['data'];
+    final result = await HttpQuery(route: e.route).request(e.params);
+    e.state.error = result[HttpQuery.kStatus] != 1;
+    e.state.data = result[HttpQuery.kData];
     emit(e.state);
   }
 }

@@ -11,8 +11,8 @@ class HttpQuery {
   static const hrNetworkError = 2;
   static const hrUnauthorized = 3;
   static const hrUnknown = 4;
-  static const kStatus = 'kStatus';
-  static const kData = 'kData';
+  static const kStatus = 'status';
+  static const kData = 'data';
 
   static const qListOfTasks = 1;
   static const qListOfTeamlead = 2;
@@ -35,19 +35,21 @@ class HttpQuery {
   static const qWorkDetailsUpdateUnDone = 19;
   static const qWorkDetailsUpdateDoneArray2 = 20;
 
-  final String route;
-  HttpQuery({this.route = 'index.php'});
+  String route;
+  HttpQuery({this.route = 'index'});
 
   Future<Map<String, dynamic>> request(Map<String, Object?> inData) async {
     Map<String, Object?> outData = {};
     String strBody = jsonEncode(inData);
-    print('request: $strBody');
+    if (kDebugMode) {
+      print('route: /engine/elinaworkshop/$route.php');
+      print('request: $strBody');
+    }
     try {
       var response = await http
-          .post(Uri.https('aws.elina.am', '/engine/elinaworkshop/$route.php'),
+          .post(Uri.https('e3.picasso.am', '/engine/elinaworkshop/$route.php'),
           headers: {
             'Content-Type': 'application/json',
-            'Content-Length': '${utf8.encode(strBody).length}'
           },
           body: utf8.encode(strBody))
           .timeout(const Duration(seconds: 25), onTimeout: () {

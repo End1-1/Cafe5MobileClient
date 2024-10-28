@@ -1,86 +1,60 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cafe5_mobile_client/app.dart';
 import 'package:cafe5_mobile_client/base_widget.dart';
+import 'package:cafe5_mobile_client/classes/bloc.dart';
 import 'package:cafe5_mobile_client/translator.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import 'class_employee.dart';
-import 'config.dart';
-import 'db.dart';
 
-class TheTaskProcess extends StatefulWidget {
+class TheTaskProcess extends App {
   int taskId;
   int processId;
   String processName;
   double price;
-
-  TheTaskProcess({required this.taskId, required this.processId, required this.processName, required this.price});
-
-  @override
-  State<StatefulWidget> createState() {
-    return TheTaskProcessState();
-  }
-}
-
-class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
   List<Employee> _employes = [];
   Employee? _employee;
   TextEditingController _processQtyTextController = TextEditingController();
 
-  @override
-  void handler(Uint8List data) {
-    SocketMessage m = SocketMessage(messageId: 0, command: 0);
-    m.setBuffer(data);
-    int dllok = m.getByte();
-    switch (dllok) {
-      case 0:
-        sd(tr("Required dll not found on server."));
-        break;
-      case 1:
-        sd(tr("Required dll function not found on server."));
-        break;
-      case 2:
-        int dllop = m.getInt();
-        int dlloperror = m.getByte();
-        if (dlloperror == 0) {
-          sd(m.getString());
-          return;
-        }
-        switch (dllop) {
-          case SocketMessage.op_save_process:
-            Navigator.pop(context);
-            break;
-        }
-        break;
-    }
-  }
+  TheTaskProcess({required this.taskId, required this.processId, required this.processName, required this.price});
+
+
 
   @override
-  void initState() {
-    Db.query('employes').then((map) {
-      List.generate(map.length, (i) {
-        Employee e = Employee(id: map[i]['id'], group: map[i]['group_id'], name: map[i]["name"]);
-        _employes.add(e);
-      });
-    });
-    // Db.query('processes').then((map) {
-    //   List.generate(map.length, (i) {
-    //     MfProcess p = MfProcess(id: map[i]['id'], name: map[i]["name"]);
-    //     _processes.add(p);
-    //   });
-    // });
-    super.initState();
-  }
+  // void initState() {
+  //   Db.query('employes').then((map) {
+  //     List.generate(map.length, (i) {
+  //       Employee e = Employee(id: map[i]['id'], group: map[i]['group_id'], name: map[i]["name"]);
+  //       _employes.add(e);
+  //     });
+  //   });
+  //   // Db.query('processes').then((map) {
+  //   //   List.generate(map.length, (i) {
+  //   //     MfProcess p = MfProcess(id: map[i]['id'], name: map[i]["name"]);
+  //   //     _processes.add(p);
+  //   //   });
+  //   // });
+  //   super.initState();
+  // }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-            child: Column(
+  Widget body(BuildContext context) {
+    return BlocConsumer(listener: (context, state){
+
+       if (state is AppStateTaskWindows) {
+          switch (state.cmd) {
+            case SocketMessage.op_save_process:
+              Navigator.pop(context);
+              break;
+          }
+      }
+    }, builder: (context, state) {return Column(
       children: [
         Row(
           children: [
@@ -130,7 +104,7 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
               style: TextStyle(fontSize: 18),
             ),
             Expanded(child: Container()),
-            Container(width: 300, child: Text(widget.processName, style: TextStyle(fontSize: 18)))
+            Container(width: 300, child: Text(processName, style: TextStyle(fontSize: 18)))
           ],
         ),
         Row(
@@ -140,7 +114,7 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
               style: TextStyle(fontSize: 18),
             ),
             Expanded(child: Container()),
-            Container(width: 300, child: Text(widget.price.toString(), style: TextStyle(fontSize: 18)))
+            Container(width: 300, child: Text(price.toString(), style: TextStyle(fontSize: 18)))
           ],
         ),
         Row(
@@ -170,7 +144,7 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
           ],
         )
       ],
-    )));
+    );});
   }
 
   void _save() {
@@ -184,16 +158,16 @@ class TheTaskProcessState extends BaseWidgetState<TheTaskProcess> {
       return;
     }
 
-    SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
-    m.addString("rwmftasks");
-    m.addInt(SocketMessage.op_save_process);
-    m.addString(Config.getString(key_database_name));
-    m.addInt(widget.taskId);
-    m.addInt(widget.processId);
-    m.addInt(_employee!.id);
-    m.addDouble(qty);
-    m.addDouble(widget.price);
-    m.addString(DateFormat("dd/MM/yyyy").format(DateTime.now()));
-    sendSocketMessage(m);
+    httpQuery('/engine/elinaworkshop/index.php', AppStateTaskWindows(SocketMessage.op_save_process), {
+      'action':'rwmftasks',
+      'actionid': SocketMessage.op_save_process,
+      'taskid': taskId,
+      'processid': processId,
+      'employeeid': _employee?.id,
+      'qty':qty,
+      'price': price,
+      'date': DateFormat("dd/MM/yyyy").format(DateTime.now())
+    });
+
   }
 }

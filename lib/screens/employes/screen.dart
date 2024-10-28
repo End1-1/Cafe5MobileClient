@@ -82,7 +82,7 @@ class EmployesList extends StatelessWidget {
                       itemBuilder: (context, i){
                     final e = lst[i];
                     return InkWell(onTap:() {
-                      HttpQuery('index.php').request({'query': HttpQuery.qAddWorkerToWork, 'f_worker': e.f_id, 'f_date': DateFormat('dd/MM/yyyy').format(date)}).then((value) {
+                      HttpQuery().request({'query': HttpQuery.qAddWorkerToWork, 'f_worker': e.f_id, 'f_date': DateFormat('dd/MM/yyyy').format(date)}).then((value) {
                         if (value[HttpQuery.kStatus] == HttpQuery.hrOk) {
                           Navigator.pop(context, e);
                         }

@@ -163,4 +163,8 @@ abstract class App extends StatelessWidget {
     );
   }
 
+  Widget rowSpace() {
+    return const SizedBox(height: 10);
+  }
+
 }

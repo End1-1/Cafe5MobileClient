@@ -5,11 +5,13 @@ import 'package:cafe5_mobile_client/widget_choose_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Config.init();
+  prefs = await SharedPreferences.getInstance();
   PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
     String appName = packageInfo.appName;
     String packageName = packageInfo.packageName;
@@ -17,7 +19,6 @@ void main() async {
     String buildNumber = packageInfo.buildNumber;
     Config.setString('appversion', '$version.$buildNumber');
   });
-  Config.setString(key_database_name, 'store');
 
   runApp(
     MultiBlocProvider(providers: [

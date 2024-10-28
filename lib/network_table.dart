@@ -35,24 +35,9 @@ class NetworkTable {
     }
   }
 
-  void readData(SocketMessage m) {
-    for (int r = 0; r < rowCount; r++) {
-      List<dynamic> row = [];
-      for (int c = 0; c < columnCount; c++) {
-        switch (dataTypes[c]) {
-          case datatype_int:
-            row.add(m.getInt());
-            break;
-          case datatype_double:
-            row.add(m.getDouble());
-            break;
-          case datatype_string:
-            row.add(m.getInt());
-            break;
-        }
-      }
-      data.add(row);
-    }
+  void readData(List<List<dynamic>> m) {
+    data.clear();
+    data.addAll(m);
   }
 
   void readStrings(SocketMessage m) {

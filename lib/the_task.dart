@@ -30,7 +30,8 @@ class TheTask extends App {
   List<ClassWorkshop> workshop = [];
   List<ClassStage> stages = [];
   bool _showNotes = false;
-  late TextEditingController _productQtyTextController;
+  final _productQtyTextController = TextEditingController();
+  final _pinController = TextEditingController();
   NetworkTable _processTable = new NetworkTable();
   Product? _product;
   ClassWorkshop? _workshop;
@@ -56,81 +57,6 @@ class TheTask extends App {
   };
 
   TheTask({required this.taskId});
-
-
-  @override
-  void handler(Uint8List data) {
-    _dataLoading = false;
-    SocketMessage m = SocketMessage(messageId: 0, command: 0);
-    m.setBuffer(data);
-    int dllok = m.getByte();
-    switch (dllok) {
-
-      case 2:
-        int dllop = m.getInt();
-        int dlloperror = m.getByte();
-        if (dlloperror == 0) {
-          sd(m.getString());
-          return;
-        }
-        switch (dllop) {
-          case SocketMessage.op_create_task:
-            widget.taskId = m.getInt();
-            _loadTask(widget.taskId);
-            break;
-          case SocketMessage.op_load_task:
-            setState(() {
-              _dateCreated = m.getString();
-              _timeCreated = m.getString();
-              _productQtyTextController.text = m.getDouble().toString();
-              _product = Product(id: 0, name: m.getString());
-              _workshop = _workshopById(m.getInt());
-              _stage = _stageById(m.getInt());
-              _readyQty = m.getDouble();
-              _outQty = m.getDouble();
-              String notes = m.getString();
-              try {
-                Map<String, dynamic> notesJson = jsonDecode(notes);
-                notesJson.forEach((key, value) {
-                  if (_notesCotroller.containsKey(key)) {
-                    _notesCotroller[key]!.text = value;
-                  }
-                });
-              } catch (e) {
-                print(e);
-              }
-              int processok = m.getByte();
-              if (processok == 0) {
-                return;
-              }
-              _processTable.readFromSocketMessage(m);
-              double d1 = 0, d2 = 0;
-              for (int i = 0; i < _processTable.rowCount; i++) {
-                d1 += _processTable.getRawData(i, 5);
-                d2 += _processTable.getRawData(i, 6);
-              }
-              _totalpercent = 100 * (d2 / d1);
-            });
-            break;
-          case SocketMessage.op_set_workshop:
-            setState(() {
-              _workshop = _workshopById(m.getInt());
-            });
-            break;
-          case SocketMessage.op_set_state:
-            setState(() {
-              _stage = _stageById(m.getInt());
-            });
-            break;
-          case SocketMessage.op_save_task_notes:
-            setState(() {
-              _showNotes = false;
-            });
-            break;
-        }
-        break;
-    }
-  }
 
   // @override
   // void initState() {
@@ -166,392 +92,425 @@ class TheTask extends App {
   // }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        //resizeToAvoidBottomInset: false,
-        body: SafeArea(
-            child: SingleChildScrollView(
-                child: Container(
-                    height: MediaQuery.of(context).size.height,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Visibility(
-                            visible: taskId > 0,
-                            child: Container(
-                                width: double.infinity,
-                                color: Colors.black12,
-                                padding: const EdgeInsets.all(5),
-                                child: Text(
-                                    _product == null ? "..." : _product!.name,
-                                    style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold)))),
-                        Visibility(
-                            visible: taskId == 0,
-                            child: Container(
-                                color: Colors.black12,
-                                padding: const EdgeInsets.all(5),
-                                child: Row(children: [
-                                  Text(tr("New task")),
-                                  Expanded(child: Container()),
-                                  Container(
-                                      width: 300,
-                                      child: RawAutocomplete<Product>(
-                                        textEditingController:
-                                            _autoTextEditingController1,
-                                        key: _autoKey1,
-                                        focusNode: _autoFocus1,
-                                        displayStringForOption: (option) =>
-                                            option.name,
-                                        optionsBuilder: (TextEditingValue t) {
-                                          return products.where((Product p) {
-                                            return p.name
-                                                .toLowerCase()
-                                                .contains(t.text.toLowerCase());
-                                          }).toList();
-                                        },
-                                        fieldViewBuilder: (BuildContext context,
-                                            TextEditingController
-                                                fieldTextEditingController,
-                                            FocusNode fieldFocusNode,
-                                            VoidCallback onFieldSubmitted) {
-                                          return TextField(
-                                            controller:
-                                                fieldTextEditingController,
-                                            focusNode: fieldFocusNode,
-                                          );
-                                        },
-                                        optionsViewBuilder:
-                                            (BuildContext context,
-                                                AutocompleteOnSelected<Product>
-                                                    onSelected,
-                                                Iterable<Product> options) {
-                                          return Align(
-                                              alignment: Alignment.topLeft,
-                                              child: Material(
-                                                child: SizedBox(
-                                                    width: 300,
-                                                    height: 400,
-                                                    child: ListView.builder(
-                                                        itemCount:
-                                                            options.length,
-                                                        itemBuilder:
-                                                            (BuildContext
-                                                                    context,
-                                                                int i) {
-                                                          final Product w =
-                                                              options
-                                                                  .elementAt(i);
-                                                          return GestureDetector(
-                                                              onTap: () {
-                                                                onSelected(w);
-                                                              },
-                                                              child: ListTile(
-                                                                  title: Text(
-                                                                      w.name)));
-                                                        })),
-                                              ));
-                                        },
-                                        onSelected: (Product p) {
-                                          _product = p;
-                                        },
-                                      )),
-                                ]))),
+  Widget body(BuildContext context) {
+    return BlocConsumer(listener: (context, state) {
+      if (state is AppStateTaskWindows) {
+        switch (state.cmd) {
+          case SocketMessage.op_create_task:
+            taskId = state.data["taskid"];
+            _loadTask(taskId);
+            break;
+          case SocketMessage.op_load_task:
+            _dateCreated = state.data['datecreated'];
+            _timeCreated = state.data['timecreate'];
+            _productQtyTextController.text = state.data['productqty'];
+            _product = Product(id: 0, name: state.data['productid']);
+            _workshop = _workshopById(state.data['workshopid']);
+            _stage = _stageById(state.data['stageid']);
+            _readyQty = state.data['readyqqty'];
+            _outQty = state.data['outqty'];
+            String notes = state.data['notes'];
+            try {
+              Map<String, dynamic> notesJson = jsonDecode(notes);
+              notesJson.forEach((key, value) {
+                if (_notesCotroller.containsKey(key)) {
+                  _notesCotroller[key]!.text = value;
+                }
+              });
+            } catch (e) {
+              print(e);
+            }
 
-                        //WORKSHOP
-                        Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: const Color(0xABABABEA)),
-                                color: const Color(0xEAD9D9D9)),
-                            padding: const EdgeInsets.all(5),
-                            child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(children: [
-                                    Expanded(
-                                        child: Text(
-                                      tr("Workshop"),
-                                      style: const TextStyle(fontSize: 22),
-                                    )),
-                                    Expanded(
-                                        child: Container(
-                                            padding: const EdgeInsets.all(5),
-                                            child: Text(
-                                              tr("Stage"),
-                                              style:
-                                                  const TextStyle(fontSize: 22),
-                                            ))),
-                                  ]),
-                                  Row(children: [
-                                    Expanded(
-                                        child: Row(children: [
-                                      Expanded(
-                                          child: RawAutocomplete<ClassWorkshop>(
-                                        textEditingController:
-                                            _autoTextEditingController2,
-                                        key: _autoKey2,
-                                        focusNode: _autoFocus2,
-                                        displayStringForOption: (option) =>
-                                            option.name,
-                                        optionsBuilder: (TextEditingValue t) {
-                                          return workshop
-                                              .where((ClassWorkshop p) {
-                                            return p.name
-                                                .toLowerCase()
-                                                .startsWith(
-                                                    t.text.toLowerCase());
-                                          }).toList();
-                                        },
-                                        fieldViewBuilder: (BuildContext context,
-                                            TextEditingController
-                                                fieldTextEditingController,
-                                            FocusNode fieldFocusNode,
-                                            VoidCallback onFieldSubmitted) {
-                                          return TextFormField(
-                                            controller:
-                                                fieldTextEditingController
-                                                  ..text = (_workshop == null
-                                                      ? ""
-                                                      : _workshop?.name)!,
-                                            focusNode: fieldFocusNode,
-                                          );
-                                        },
-                                        optionsViewBuilder: (BuildContext
-                                                context,
-                                            AutocompleteOnSelected<
-                                                    ClassWorkshop>
-                                                onSelected,
-                                            Iterable<ClassWorkshop> options) {
-                                          return Align(
-                                              alignment: Alignment.topLeft,
-                                              child: Material(
-                                                child: Container(
-                                                    width: 300,
-                                                    height: 400,
-                                                    child: ListView.builder(
-                                                        shrinkWrap: true,
-                                                        itemCount:
-                                                            options.length,
-                                                        itemBuilder:
-                                                            (BuildContext
-                                                                    context,
-                                                                int i) {
-                                                          final ClassWorkshop
-                                                              w = options
-                                                                  .elementAt(i);
-                                                          return GestureDetector(
-                                                              onTap: () {
-                                                                onSelected(w);
-                                                              },
-                                                              child: ListTile(
-                                                                  title: Text(
-                                                                      w.name)));
-                                                        })),
-                                              ));
-                                        },
-                                        onSelected: (ClassWorkshop p) {
-                                          if (taskId > 0) {
-                                            sq(tr("Change workshop?"), () {
-                                              httpQuery('/engine/elinaworkshop/index.php', state,
-                                                  {
-                                                    'action': 'rwmtasks',
-                                                    'actionid': SocketMessage.op_set_workshop,
-                                                    'taskid': taskid,
-                                                    'pid': p.id
-                                                  });
-                                            }, () {});
-                                          } else {
-                                            _workshop = p;
-                                          }
-                                        },
-                                      )),
-                                      taskId == 0
-                                          ? Container()
-                                          : ClassOutlinedButton.createImage(() {
-                                              _autoTextEditingController2
-                                                  .clear();
-                                            }, "images/delete.png",
-                                              w: 24, h: 24)
-                                    ])),
-                                    Expanded(
-                                        child: Container(
-                                            margin:
-                                                const EdgeInsets.only(left: 5),
-                                            child: Text(
-                                                _stage == null
-                                                    ? "?"
-                                                    : _stage!.name,
-                                                style: const TextStyle(
-                                                    fontSize: 18))))
-                                  ]),
-                                ])),
+            _processTable.readData(state.data['data']);
+            double d1 = 0, d2 = 0;
+            for (int i = 0; i < _processTable.rowCount; i++) {
+              d1 += _processTable.getRawData(i, 5);
+              d2 += _processTable.getRawData(i, 6);
+            }
+            _totalpercent = 100 * (d2 / d1);
 
-                        Container(
-                            padding: const EdgeInsets.all(5),
-                            child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
+            break;
+          case SocketMessage.op_set_workshop:
+            _workshop = _workshopById(state.data['workshopid']);
+
+            break;
+          case SocketMessage.op_set_state:
+            _stage = _stageById(state.data['stateid']);
+
+            break;
+          case SocketMessage.op_save_task_notes:
+            _showNotes = false;
+
+            break;
+        }
+      }
+    }, builder: (builder, state) {
+      return SingleChildScrollView(
+          child: Container(
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Visibility(
+                      visible: taskId > 0,
+                      child: Container(
+                          width: double.infinity,
+                          color: Colors.black12,
+                          padding: const EdgeInsets.all(5),
+                          child: Text(_product == null ? "..." : _product!.name,
+                              style: const TextStyle(
+                                  fontSize: 22, fontWeight: FontWeight.bold)))),
+                  Visibility(
+                      visible: taskId == 0,
+                      child: Container(
+                          color: Colors.black12,
+                          padding: const EdgeInsets.all(5),
+                          child: Row(children: [
+                            Text(tr("New task")),
+                            Expanded(child: Container()),
+                            Container(
+                                width: 300,
+                                child: RawAutocomplete<Product>(
+                                  textEditingController:
+                                      _autoTextEditingController1,
+                                  key: _autoKey1,
+                                  focusNode: _autoFocus1,
+                                  displayStringForOption: (option) =>
+                                      option.name,
+                                  optionsBuilder: (TextEditingValue t) {
+                                    return products.where((Product p) {
+                                      return p.name
+                                          .toLowerCase()
+                                          .contains(t.text.toLowerCase());
+                                    }).toList();
+                                  },
+                                  fieldViewBuilder: (BuildContext context,
+                                      TextEditingController
+                                          fieldTextEditingController,
+                                      FocusNode fieldFocusNode,
+                                      VoidCallback onFieldSubmitted) {
+                                    return TextField(
+                                      controller: fieldTextEditingController,
+                                      focusNode: fieldFocusNode,
+                                    );
+                                  },
+                                  optionsViewBuilder: (BuildContext context,
+                                      AutocompleteOnSelected<Product>
+                                          onSelected,
+                                      Iterable<Product> options) {
+                                    return Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Material(
+                                          child: SizedBox(
+                                              width: 300,
+                                              height: 400,
+                                              child: ListView.builder(
+                                                  itemCount: options.length,
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int i) {
+                                                    final Product w =
+                                                        options.elementAt(i);
+                                                    return GestureDetector(
+                                                        onTap: () {
+                                                          onSelected(w);
+                                                        },
+                                                        child: ListTile(
+                                                            title:
+                                                                Text(w.name)));
+                                                  })),
+                                        ));
+                                  },
+                                  onSelected: (Product p) {
+                                    _product = p;
+                                  },
+                                )),
+                          ]))),
+
+                  //WORKSHOP
+                  Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xABABABEA)),
+                          color: const Color(0xEAD9D9D9)),
+                      padding: const EdgeInsets.all(5),
+                      child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Expanded(
+                                  child: Text(
+                                tr("Workshop"),
+                                style: const TextStyle(fontSize: 22),
+                              )),
+                              Expanded(
+                                  child: Container(
+                                      padding: const EdgeInsets.all(5),
+                                      child: Text(
+                                        tr("Stage"),
+                                        style: const TextStyle(fontSize: 22),
+                                      ))),
+                            ]),
+                            Row(children: [
+                              Expanded(
+                                  child: Row(children: [
+                                Expanded(
+                                    child: RawAutocomplete<ClassWorkshop>(
+                                  textEditingController:
+                                      _autoTextEditingController2,
+                                  key: _autoKey2,
+                                  focusNode: _autoFocus2,
+                                  displayStringForOption: (option) =>
+                                      option.name,
+                                  optionsBuilder: (TextEditingValue t) {
+                                    return workshop.where((ClassWorkshop p) {
+                                      return p.name
+                                          .toLowerCase()
+                                          .startsWith(t.text.toLowerCase());
+                                    }).toList();
+                                  },
+                                  fieldViewBuilder: (BuildContext context,
+                                      TextEditingController
+                                          fieldTextEditingController,
+                                      FocusNode fieldFocusNode,
+                                      VoidCallback onFieldSubmitted) {
+                                    return TextFormField(
+                                      controller: fieldTextEditingController
+                                        ..text = (_workshop == null
+                                            ? ""
+                                            : _workshop?.name)!,
+                                      focusNode: fieldFocusNode,
+                                    );
+                                  },
+                                  optionsViewBuilder: (BuildContext context,
+                                      AutocompleteOnSelected<ClassWorkshop>
+                                          onSelected,
+                                      Iterable<ClassWorkshop> options) {
+                                    return Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Material(
                                           child: Container(
-                                        padding: const EdgeInsets.all(5),
-                                        child: Text(tr("Date created")),
-                                      )),
-                                      Expanded(
-                                          child: Container(
-                                        padding: const EdgeInsets.all(5),
-                                        //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
-                                        child: Text(tr("Total qty")),
-                                      ))
-                                    ],
-                                  ),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                            padding: const EdgeInsets.all(5),
-                                            //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
-                                            child: Text(
-                                                "$_dateCreated $_timeCreated")),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                            padding: const EdgeInsets.all(5),
-                                            //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
-                                            child: TextFormField(
-                                                decoration: const InputDecoration(
-                                                    //border: InputBorder.none,
-                                                    contentPadding: EdgeInsets.symmetric(vertical: 10),
-                                                    //Change this value to custom as you like
-                                                    isDense: true,
-                                                    // and add this line
-                                                    hintText: 'User Name',
-                                                    hintStyle: TextStyle(
-                                                      color: Color(0xFFF00),
-                                                    )),
-                                                readOnly: taskId > 0,
-                                                keyboardType: TextInputType.number,
-                                                controller: _productQtyTextController,
-                                                inputFormatters: <TextInputFormatter>[
-                                                  FilteringTextInputFormatter
-                                                      .digitsOnly
-                                                ])),
-                                      )
-                                    ],
-                                  )
-                                ])),
+                                              width: 300,
+                                              height: 400,
+                                              child: ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount: options.length,
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int i) {
+                                                    final ClassWorkshop w =
+                                                        options.elementAt(i);
+                                                    return GestureDetector(
+                                                        onTap: () {
+                                                          onSelected(w);
+                                                        },
+                                                        child: ListTile(
+                                                            title:
+                                                                Text(w.name)));
+                                                  })),
+                                        ));
+                                  },
+                                  onSelected: (ClassWorkshop p) {
+                                    if (taskId > 0) {
+                                      sq(tr("Change workshop?"), () {
+                                        httpQuery(
+                                            '/engine/elinaworkshop/index.php',
+                                            AppStateTaskWindows(
+                                                SocketMessage.op_set_workshop),
+                                            {
+                                              'action': 'rwmtasks',
+                                              'actionid':
+                                                  SocketMessage.op_set_workshop,
+                                              'taskid': taskId,
+                                              'pid': p.id
+                                            });
+                                      }, () {});
+                                    } else {
+                                      _workshop = p;
+                                    }
+                                  },
+                                )),
+                                taskId == 0
+                                    ? Container()
+                                    : ClassOutlinedButton.createImage(() {
+                                        _autoTextEditingController2.clear();
+                                      }, "images/delete.png", w: 24, h: 24)
+                              ])),
+                              Expanded(
+                                  child: Container(
+                                      margin: const EdgeInsets.only(left: 5),
+                                      child: Text(
+                                          _stage == null ? "?" : _stage!.name,
+                                          style:
+                                              const TextStyle(fontSize: 18))))
+                            ]),
+                          ])),
 
-                        //DETAILS
-                        Divider(),
-                        Row(
-                          children:[Text(tr('Details')),
-                          Expanded(child: Container()),
-                            InkWell(onTap:(){
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (builder) => WorkDetailsScreen(_product!.name, 0, widget.taskId,
-                                          ))).then((value) {
-                                _loadTask(widget.taskId);
+                  Container(
+                      padding: const EdgeInsets.all(5),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                    child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Text(tr("Date created")),
+                                )),
+                                Expanded(
+                                    child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
+                                  child: Text(tr("Total qty")),
+                                ))
+                              ],
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                      padding: const EdgeInsets.all(5),
+                                      //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
+                                      child:
+                                          Text("$_dateCreated $_timeCreated")),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                      padding: const EdgeInsets.all(5),
+                                      //decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white),
+                                      child: TextFormField(
+                                          decoration: const InputDecoration(
+                                              //border: InputBorder.none,
+                                              contentPadding:
+                                                  EdgeInsets.symmetric(
+                                                      vertical: 10),
+                                              //Change this value to custom as you like
+                                              isDense: true,
+                                              // and add this line
+                                              hintText: 'User Name',
+                                              hintStyle: TextStyle(
+                                                color: Color(0xFFF00),
+                                              )),
+                                          readOnly: taskId > 0,
+                                          keyboardType: TextInputType.number,
+                                          controller: _productQtyTextController,
+                                          inputFormatters: <TextInputFormatter>[
+                                            FilteringTextInputFormatter
+                                                .digitsOnly
+                                          ])),
+                                )
+                              ],
+                            )
+                          ])),
 
-                              });
-                            }, child: Image.asset(
-                              'images/new.png',
-                              width: 30,
-                              height: 30,
+                  //DETAILS
+                  Divider(),
+                  Row(children: [
+                    Text(tr('Details')),
+                    Expanded(child: Container()),
+                    InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (builder) => WorkDetailsScreen(
+                                        _product!.name,
+                                        0,
+                                        taskId,
+                                      ))).then((value) {
+                            _loadTask(taskId);
+                          });
+                        },
+                        child: Image.asset(
+                          'images/new.png',
+                          width: 30,
+                          height: 30,
+                        )),
+                    const SizedBox(width: 10)
+                  ]),
+                  StreamBuilder(
+                      stream: _detailsStream.stream,
+                      builder: (builder, snapshot) {
+                        return Container();
+                      }),
+                  Divider(),
+
+                  Container(
+                      padding: const EdgeInsets.all(10),
+                      child: taskId == 0
+                          ? TextButton(
+                              onPressed: _createTask, child: Text(tr("Create")))
+                          : Row(
+                              children: [
+                                Expanded(
+                                    child: TextButton(
+                                        onPressed: _doShowNotes,
+                                        child: Text(tr("Notes")))),
+                                Expanded(
+                                    child: TextButton(
+                                        onPressed: _activateState,
+                                        child: Text(tr("Activate state")))),
+                                Expanded(
+                                    child: TextButton(
+                                        onPressed: _executeProcess,
+                                        child: Text(tr("Execute")))),
+                              ],
                             )),
-                          const SizedBox(width: 10)]
-                        ),
-                        StreamBuilder(stream: _detailsStream.stream, builder: (builder, snapshot) {
-                          return Container();
-                        }),
-                        Divider(),
 
-                        Container(
-                            padding: const EdgeInsets.all(10),
-                            child: taskId == 0
-                                ? TextButton(
-                                    onPressed: _createTask,
-                                    child: Text(tr("Create")))
-                                : Row(
-                                    children: [
-                                      Expanded(
-                                          child: TextButton(
-                                              onPressed: _doShowNotes,
-                                              child: Text(tr("Notes")))),
-                                      Expanded(
-                                          child: TextButton(
-                                              onPressed: _activateState,
-                                              child:
-                                                  Text(tr("Activate state")))),
-                                      Expanded(
-                                          child: TextButton(
-                                              onPressed: _executeProcess,
-                                              child: Text(tr("Execute")))),
-                                    ],
-                                  )),
+                  AnimatedContainer(
+                      height: _showNotes ? 400 : 0,
+                      padding: const EdgeInsets.all(5),
+                      duration: const Duration(milliseconds: 500),
+                      child: SingleChildScrollView(
+                          child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _notesCotroller.length + 1,
+                        itemBuilder: (BuildContext context, int index) {
+                          return index < _notesCotroller.length
+                              ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                        child: Text(_notesCotroller.keys
+                                            .elementAt(index))),
+                                    Expanded(
+                                        child: TextFormField(
+                                            controller: _notesCotroller.values
+                                                .elementAt(index)))
+                                  ],
+                                )
+                              : TextButton(
+                                  onPressed: _doSaveNotes,
+                                  child: Text(tr("Save")));
+                        },
+                      ))),
 
-
-                        AnimatedContainer(
-                            height: _showNotes ? 400 : 0,
-                            padding: const EdgeInsets.all(5),
-                            duration: const Duration(milliseconds: 500),
-                            child: SingleChildScrollView(
-                                child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: _notesCotroller.length + 1,
-                              itemBuilder: (BuildContext context, int index) {
-                                return index < _notesCotroller.length
-                                    ? Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Expanded(
-                                              child: Text(_notesCotroller.keys
-                                                  .elementAt(index))),
-                                          Expanded(
-                                              child: TextFormField(
-                                                  controller: _notesCotroller
-                                                      .values
-                                                      .elementAt(index)))
-                                        ],
-                                      )
-                                    : TextButton(
-                                        onPressed: _doSaveNotes,
-                                        child: Text(tr("Save")));
-                              },
-                            ))),
-
-
-                        LinearPercentIndicator(
-                          //leaner progress bar
-                          animation: true,
-                          animationDuration: 1000,
-                          lineHeight: 20.0,
-                          percent: _totalpercent / 100,
-                          center: Text(
-                            "${_totalpercent.toStringAsFixed(1)}%",
-                            style: const TextStyle(
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black),
-                          ),
-                          linearStrokeCap: LinearStrokeCap.roundAll,
-                          progressColor: Colors.blue[400],
-                          backgroundColor: Colors.grey[300],
-                        ),
-                        Expanded(child: _listOfProcesses()),
-                      ],
-                    )))));
+                  LinearPercentIndicator(
+                    //leaner progress bar
+                    animation: true,
+                    animationDuration: 1000,
+                    lineHeight: 20.0,
+                    percent: _totalpercent / 100,
+                    center: Text(
+                      "${_totalpercent.toStringAsFixed(1)}%",
+                      style: const TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black),
+                    ),
+                    linearStrokeCap: LinearStrokeCap.roundAll,
+                    progressColor: Colors.blue[400],
+                    backgroundColor: Colors.grey[300],
+                  ),
+                  Expanded(child: _listOfProcesses()),
+                ],
+              )));
+    });
   }
 
   Widget _listOfProcesses() {
@@ -587,8 +546,7 @@ class TheTask extends App {
           selected: i == _processTable.selectedIndex,
           onSelectChanged: (val) {
             //NOTIFY WIDGET
-              _processTable.selectedIndex = val! ? i : -1;
-
+            _processTable.selectedIndex = val! ? i : -1;
           });
       rows.add(dr);
     }
@@ -632,19 +590,21 @@ class TheTask extends App {
       sd(tr("Input right quantity"));
       return;
     }
-    httpQuery('/engine/elinaworkshop/index.php', state, {
+    httpQuery('/engine/elinaworkshop/index.php',
+        AppStateTaskWindows(SocketMessage.op_create_task), {
       'action': 'rmwtasks',
       'actionid': SocketMessage.op_create_task,
       'productid': _product!.id,
-      'qty':qty,
+      'qty': qty,
       'workshopid': _workshop!.id,
-      'stage': _stage ==  null ? 0 : _stage?.id
+      'stage': _stage == null ? 0 : _stage?.id
     });
   }
 
   void _loadTask(int id) {
-    httpQuery('engine/elinaworkshop/index.php', state, {
-      'action':'rwmftasks',
+    httpQuery('engine/elinaworkshop/index.php',
+        AppStateTaskWindows(SocketMessage.op_load_task), {
+      'action': 'rwmftasks',
       'actionid': SocketMessage.op_load_task,
       'id': id
     });
@@ -656,13 +616,14 @@ class TheTask extends App {
       return;
     }
     sq(tr("Change current state?"), () {
-      httpQuery('/engine/elinaworkshop/index.php', state, {
+      httpQuery('/engine/elinaworkshop/index.php',
+          AppStateTaskWindows(SocketMessage.op_set_state), {
         'action': 'rwmfasks',
         'actionid': SocketMessage.op_set_state,
         'taskid': taskId,
-        'processid': _processTable.getRawData(_processTable.selectedIndex, 0);
+        'processid': _processTable.getRawData(_processTable.selectedIndex, 0)
       });
-
+    }, () {});
   }
 
   void _executeProcess() {
@@ -706,9 +667,9 @@ class TheTask extends App {
   }
 
   void _doShowNotes() {
-    setState(() {
+//STATE
       _showNotes = !_showNotes;
-    });
+
   }
 
   void _doSaveNotes() {

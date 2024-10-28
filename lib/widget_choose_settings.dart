@@ -26,35 +26,47 @@ class WidgetChooseSettings extends App {
                 (route) => false);
           }
         },
-        child: Flex(
-            direction: Axis.vertical,
+        child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              rowSpace(),
               Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Image.asset('images/logo_big.png')]),
+              rowSpace(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(child: Styling.textFormField(_pinController, 'ՊԻՆ'))
+                  Expanded(
+                      child: Container(
+                          constraints: BoxConstraints(
+                              maxWidth: MediaQuery.sizeOf(context).width * 0.5),
+                          child: Styling.textFormField(_pinController, 'ՊԻՆ')))
                 ],
               ),
+              rowSpace(),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Styling.textButton(() {
-                    httpQuery('/engine/login.php', AppStateLoginSuccess(),
-                        {'pin': _pinController.text, 'method': 1});
+                    httpQuery('login', AppStateLoginSuccess(),
+                        {'pin': _pinController.text, 'method': 2});
                   }, 'Մուտք')
                 ],
               ),
               Align(
                 alignment: Alignment.center,
+                child: Text(
+                  Config.getString('lasterror'),
+                ),
+              ),
+              Expanded(child: Container()),
+              Align(
+                alignment: Alignment.center,
                 child: TextButton(
                   onPressed: () {},
                   child: Text(Config.getString('appversion')),
-                ),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  Config.getString('lasterror'),
                 ),
               ),
             ]));

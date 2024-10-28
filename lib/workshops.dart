@@ -2,6 +2,7 @@
 import 'package:cafe5_mobile_client/app.dart';
 import 'package:cafe5_mobile_client/class_workshop.dart';
 import 'package:cafe5_mobile_client/classes/http_query.dart';
+import 'package:cafe5_mobile_client/classes/prefs.dart';
 import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
@@ -124,10 +125,10 @@ class TheWorkshops extends App {
                         ),
                         onPressed: () {
                           _autoTextEditingController.clear();
-                          setState(() {
+                   //NOPTIFY
                             _td = NetworkTable();
                             _tw = NetworkTable();
-                          });
+
                         },
                       )),
                   Expanded(child: Container()),
@@ -217,7 +218,7 @@ class TheWorkshops extends App {
           GestureDetector(
               onTap: () {
                 Navigator.push(
-                    context,
+                    prefs.context(),
                     MaterialPageRoute(
                         builder: (context) => TheTask(taskId: code)));
               },
@@ -364,18 +365,13 @@ class TheWorkshops extends App {
   }
 
   void _loadTWorkshop(int id) {
-    HttpQuery('/engine/production/loadworkshop.php')
-        .request({'workshop': id}).then((value) {});
-    setState(() {
-      _dataLoading = true;
-    });
-    SocketMessage m = SocketMessage(
-        messageId: SocketMessage.messageNumber(),
-        command: SocketMessage.c_dllop);
-    m.addString("rwmftasks");
-    m.addInt(SocketMessage.op_load_workshop);
-    m.addString(Config.getString(key_database_name));
-    m.addInt(id);
-    sendSocketMessage(m);
+    // httpQuery('/engine/production/loadworkshop.php',
+    //     .request({'workshop': id,
+    //   'action':'rwmftasks',
+    //   'actionid':SocketMessage.op_load_workshop,
+    //   'id': id}).then((value) {
+    //
+    // });
+
   }
 }
