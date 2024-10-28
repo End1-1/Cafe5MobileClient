@@ -158,7 +158,7 @@ class TheTaskProcess extends App {
       return;
     }
 
-    httpQuery('/engine/elinaworkshop/index.php', AppStateTaskWindows(SocketMessage.op_save_process), {
+    httpQuery('index', AppStateTaskWindows(SocketMessage.op_save_process), {
       'action':'rwmftasks',
       'actionid': SocketMessage.op_save_process,
       'taskid': taskId,
@@ -166,7 +166,7 @@ class TheTaskProcess extends App {
       'employeeid': _employee?.id,
       'qty':qty,
       'price': price,
-      'date': DateFormat("dd/MM/yyyy").format(DateTime.now())
+      'date': DateFormat('yyyy-MM-dd').format(DateTime.now())
     });
 
   }

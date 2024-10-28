@@ -22,7 +22,7 @@ class ListTaskWorkModel {
   Future<bool> insertWork(int process, double price) async {
     final result = await HttpQuery().request({
       'query': HttpQuery.qAddWorkToTas,
-      'f_date': DateFormat("dd/MM/yyyy").format(date),
+      'f_date': DateFormat('yyyy-MM-dd').format(date),
       'f_worker': employee.f_id,
       'f_taskid': task.f_id,
       'f_product': task.f_product,

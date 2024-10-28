@@ -42,7 +42,7 @@ class JournalModel {
       'query': HttpQuery.qListOfWorks,
       'f_worker': employee?.f_id ?? 0,
       'f_task': taskFiltered ? task.f_id : 0,
-      'f_date': DateFormat('dd/MM/yyyy').format(date),
+      'f_date': DateFormat('yyyy-MM-dd').format(date),
       'f_teamlead': teamleaderId,
     });
     if (result[HttpQuery.kStatus] != HttpQuery.hrOk) {

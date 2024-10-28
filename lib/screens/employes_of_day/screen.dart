@@ -55,7 +55,7 @@ class EmployeOfDay extends StatelessWidget {
                                       HttpQuery().request({
                                         'query': HttpQuery.qRemoveWorker,
                                         'f_worker': em.f_id,
-                                        'f_date': DateFormat('dd/MM/yyyy')
+                                        'f_date': DateFormat('yyyy-MM-dd')
                                             .format(model.date)
                                       }).then((value) {
                                         if (value[HttpQuery.kStatus] ==

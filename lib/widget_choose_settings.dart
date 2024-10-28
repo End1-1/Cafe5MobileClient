@@ -3,7 +3,6 @@ import 'package:cafe5_mobile_client/classes/bloc.dart';
 import 'package:cafe5_mobile_client/classes/prefs.dart';
 import 'package:cafe5_mobile_client/classes/styles.dart';
 import 'package:cafe5_mobile_client/config.dart';
-import 'package:cafe5_mobile_client/home_page.dart';
 import 'package:cafe5_mobile_client/screens/journal/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,20 +20,19 @@ class WidgetChooseSettings extends App {
             if (state.error) {
               return;
             }
-          //   Navigator.pushAndRemoveUntil(
-          //       context,
-          //       MaterialPageRoute(
-          //           builder: (BuildContext context) => WidgetHome()),
-          //       (route) => false);
-          // }
+            //   Navigator.pushAndRemoveUntil(
+            //       context,
+            //       MaterialPageRoute(
+            //           builder: (BuildContext context) => WidgetHome()),
+            //       (route) => false);
+            // }
             prefs.setString('sessionkey', state.data['sessionkey']);
-           // prefs.setString('cashsession', state.data['cashsession']);
+            // prefs.setString('cashsession', state.data['cashsession']);
             Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => JournalScreen()),
-                    (route) => false);
-              }
+                context,
+                MaterialPageRoute(builder: (context) => JournalScreen()),
+                (route) => false);
+          }
         },
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -17,7 +17,7 @@ class EmployeeOfDayModel {
   Future<void> getList() async {
     final result = await HttpQuery().request({
       'query': HttpQuery.qEmployesOfDay,
-      'f_date': DateFormat('dd/MM/yyyy').format(date),
+      'f_date': DateFormat('yyyy-MM-dd').format(date),
       'f_teamlead': teamlead.f_id,
     });
     streamController.add(result);

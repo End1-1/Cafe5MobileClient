@@ -28,7 +28,7 @@ class JournalScreen extends StatelessWidget {
             minimum: const EdgeInsets.fromLTRB(5, 0, 5, 0),
             child: Column(children: [
               Row(children: [
-                SmallButton("images/back.png", () => Navigator.pop(context)),
+                SmallButton("images/back.png", () {if (Navigator.canPop(context)) {Navigator.pop(context);}}),
                 Expanded(
                     child: StreamBuilder(
                         stream: model.taskStream.stream,

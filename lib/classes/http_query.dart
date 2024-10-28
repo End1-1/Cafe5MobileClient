@@ -41,6 +41,9 @@ class HttpQuery {
 
   Future<Map<String, dynamic>> request(Map<String, Object?> inData) async {
     Map<String, Object?> outData = {};
+    if (kDebugMode) {
+      inData['debug'] = true;
+    }
     String strBody = jsonEncode(inData..addAll({'sessionkey': prefs.getString('sessionkey') ?? ''}));
     if (kDebugMode) {
       print('route: /engine/elinaworkshop/$route.php');
