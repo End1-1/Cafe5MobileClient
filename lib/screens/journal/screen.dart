@@ -4,6 +4,7 @@ import 'package:cafe5_mobile_client/classes/http_query.dart';
 import 'package:cafe5_mobile_client/classes/small_button.dart';
 import 'package:cafe5_mobile_client/classes/text_button.dart';
 import 'package:cafe5_mobile_client/config.dart';
+import 'package:cafe5_mobile_client/widget_home.dart';
 import 'package:cafe5_mobile_client/screens/employes/screen.dart';
 import 'package:cafe5_mobile_client/screens/employes_of_day/screen.dart';
 import 'package:cafe5_mobile_client/screens/list/screen.dart';
@@ -28,7 +29,14 @@ class JournalScreen extends StatelessWidget {
             minimum: const EdgeInsets.fromLTRB(5, 0, 5, 0),
             child: Column(children: [
               Row(children: [
-                SmallButton("images/back.png", () {if (Navigator.canPop(context)) {Navigator.pop(context);}}),
+                SmallButton("images/back.png", () {if (Navigator.canPop(context)) {Navigator.pop(context);} else {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => WidgetHome()));
+
+                }
+    }),
                 Expanded(
                     child: StreamBuilder(
                         stream: model.taskStream.stream,

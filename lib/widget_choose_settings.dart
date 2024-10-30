@@ -4,6 +4,7 @@ import 'package:cafe5_mobile_client/classes/prefs.dart';
 import 'package:cafe5_mobile_client/classes/styles.dart';
 import 'package:cafe5_mobile_client/config.dart';
 import 'package:cafe5_mobile_client/screens/journal/screen.dart';
+import 'package:cafe5_mobile_client/widget_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,7 +31,7 @@ class WidgetChooseSettings extends App {
             // prefs.setString('cashsession', state.data['cashsession']);
             Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => JournalScreen()),
+                MaterialPageRoute(builder: (context) => WidgetHome()),
                 (route) => false);
           }
         },

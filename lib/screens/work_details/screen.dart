@@ -37,6 +37,7 @@ class WorkDetailsScreen extends StatelessWidget {
                                   'f_task': model.task_id,
                                   'f_process': model.process,
                                   'f_color': value,
+                                  'f_34': 0,
                                   'f_36': 0,
                                   'f_38': 0,
                                   'f_40': 0,

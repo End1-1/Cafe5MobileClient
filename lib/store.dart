@@ -159,7 +159,7 @@ class StorageState extends BaseWidgetState<Storage> with TickerProviderStateMixi
       0:0, 1: 90, 2: 100, 3: 50, 4:50
     };
     List<DataColumn> cols = [];
-    for (int i = 0; i < _networkTable.columnCount; i++) {
+    for (int i = 0; i < _networkTable.columnCount(); i++) {
       DataColumn dataCol = DataColumn(
           label: Container(
               width: colsWidths[i],
@@ -168,9 +168,9 @@ class StorageState extends BaseWidgetState<Storage> with TickerProviderStateMixi
       cols.add(dataCol);
     }
     List<DataRow> rows = [];
-    for (int i = 0; i < _networkTable.rowCount; i++) {
+    for (int i = 0; i < _networkTable.rowCount(); i++) {
       List<DataCell> cells = [];
-      for (int c = 0; c < _networkTable.columnCount; c++) {
+      for (int c = 0; c < _networkTable.columnCount(); c++) {
         DataCell cell = DataCell(Container(width: colsWidths[c], child:Text(_networkTable.getDisplayData(i, c))));
         cells.add(cell);
       }

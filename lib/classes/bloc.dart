@@ -3,11 +3,19 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppState extends Equatable {
+  static int version = 0;
+  var counter = 0;
   @override
   List<Object?> get props => [];
+  AppState() {
+    version++;
+  }
 }
 
 class AppStateLoading extends AppState{}
+
+class AppStateRefresh extends AppState{}
+
 
 class AppStateHttpData extends AppState {
   late bool error;
@@ -35,6 +43,10 @@ class AppEvent extends Equatable{
   List<Object?> get props => [];
 }
 
+class AppEventRefresh extends AppEvent {
+
+}
+
 class AppEventHttpQuery<T extends AppStateHttpData> extends AppEvent {
   final String route;
   final Map<String, dynamic> params;
@@ -45,7 +57,8 @@ class AppEventHttpQuery<T extends AppStateHttpData> extends AppEvent {
 
 class AppBloc extends Bloc<AppEvent, AppState> {
   AppBloc(super.initialState)  {
-    on<AppEvent>((event, emit) => emit(AppState()));
+    on<AppEvent>((event, emit) => emit(AppState()..counter = AppState.version));
+    on<AppEventRefresh>((event, emit) => emit(AppStateRefresh()));
     on<AppEventHttpQuery>((event, emit) => httpQuery(event));
   }
   

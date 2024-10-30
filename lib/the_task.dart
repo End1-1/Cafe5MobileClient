@@ -6,6 +6,7 @@ import 'package:cafe5_mobile_client/base_widget.dart';
 import 'package:cafe5_mobile_client/class_outlinedbutton.dart';
 import 'package:cafe5_mobile_client/class_workshop.dart';
 import 'package:cafe5_mobile_client/classes/bloc.dart';
+import 'package:cafe5_mobile_client/classes/http_query.dart';
 import 'package:cafe5_mobile_client/classes/prefs.dart';
 import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
@@ -32,15 +33,15 @@ class TheTask extends App {
   bool _showNotes = false;
   final _productQtyTextController = TextEditingController();
   final _pinController = TextEditingController();
-  NetworkTable _processTable = new NetworkTable();
+  final NetworkTable _processTable = new NetworkTable();
   Product? _product;
   ClassWorkshop? _workshop;
   ClassStage? _stage;
   String _dateCreated = DateFormat('dd/MM/yyyy').format(DateTime.now());
   String _timeCreated = DateFormat('HH:mm').format(DateTime.now());
-  double _totalpercent = 0.0;
-  double _outQty = 0.0;
-  double _readyQty = 0.0;
+  num _totalpercent = 0.0;
+  num _outQty = 0.0;
+  num _readyQty = 0.0;
 
   TextEditingController _autoTextEditingController1 = TextEditingController();
   FocusNode _autoFocus1 = FocusNode();
@@ -56,60 +57,51 @@ class TheTask extends App {
     tr("Length"): TextEditingController()
   };
 
-  TheTask({required this.taskId});
+  TheTask({required this.taskId}) {
+    init();
+  }
 
-  // @override
-  // void initState() {
-  //   _productQtyTextController = TextEditingController();
-  //   super.initState();
-  //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-  //     Db.query('workshop').then((map) {
-  //       List.generate(map.length, (i) {
-  //         ClassWorkshop p =
-  //             ClassWorkshop(id: map[i]['id'], name: map[i]["name"]);
-  //         workshop.add(p);
-  //       });
-  //       Db.query('stages').then((map) {
-  //         List.generate(map.length, (i) {
-  //           ClassStage p = ClassStage(id: map[i]['id'], name: map[i]["name"]);
-  //           stages.add(p);
-  //         });
-  //         if (widget.taskId == 0) {
-  //           Db.query('products').then((map) {
-  //             List.generate(map.length, (i) {
-  //               Product p = Product(id: map[i]['id'], name: map[i]["name"]);
-  //               products.add(p);
-  //             });
-  //           });
-  //         } else {
-  //           _product = Product(id: 0, name: "...");
-  //           _loadTask(widget.taskId);
-  //
-  //         }
-  //       });
-  //     });
-  //   });
-  // }
+
+  void init() {
+    HttpQuery(route: 'rwlist').request({}).then((d) {
+      for (final e in d['data']['workshop']) {
+        workshop.add(ClassWorkshop(id: e['f_id'], name: e['f_name']));
+      }
+      for (final e in d['data']['stages']) {
+        stages.add(ClassStage(id: e['f_id'], name: e['f_name']));
+      }
+      if (taskId == 0){
+        _product = Product(id: 0, name: '...');
+          for (final e in d['data']['product']) {
+            products.add(Product(id: e['f_id'], name: e['f_name']));
+          }
+      } else {
+        _product = Product(id: 0, name: '...');
+        _loadTask(taskId);
+      }
+      BlocProvider.of<AppBloc>(prefs.context()).add(AppEvent());
+    });
+  }
 
   @override
   Widget body(BuildContext context) {
-    return BlocConsumer(listener: (context, state) {
+    return BlocConsumer<AppBloc, AppState>(listener: (context, state) {
       if (state is AppStateTaskWindows) {
         switch (state.cmd) {
           case SocketMessage.op_create_task:
-            taskId = state.data["taskid"];
+            taskId = state.data["id"];
             _loadTask(taskId);
             break;
           case SocketMessage.op_load_task:
-            _dateCreated = state.data['datecreated'];
-            _timeCreated = state.data['timecreate'];
-            _productQtyTextController.text = state.data['productqty'];
-            _product = Product(id: 0, name: state.data['productid']);
-            _workshop = _workshopById(state.data['workshopid']);
-            _stage = _stageById(state.data['stageid']);
-            _readyQty = state.data['readyqqty'];
-            _outQty = state.data['outqty'];
-            String notes = state.data['notes'];
+            _dateCreated = state.data['task']['f_datecreate'];
+            _timeCreated = state.data['task']['f_timecreate'];
+            _productQtyTextController.text = '${state.data['task']['f_qty']}';
+            _product = Product(id: 0, name: state.data['task']['f_productname']);
+            _workshop = _workshopById(state.data['task']['f_workshop']);
+            _stage = _stageById(state.data['task']['f_stage']);
+            _readyQty = state.data['task']['f_ready'];
+            _outQty = state.data['task']['f_out'] ?? 0;
+            String notes = state.data['task']['notes'] ?? '';
             try {
               Map<String, dynamic> notesJson = jsonDecode(notes);
               notesJson.forEach((key, value) {
@@ -118,14 +110,14 @@ class TheTask extends App {
                 }
               });
             } catch (e) {
-              print(e);
+              print('CANNOT PARSE NOTES $e');
             }
 
-            _processTable.readData(state.data['data']);
+            _processTable.readData(state.data['description']);
             double d1 = 0, d2 = 0;
-            for (int i = 0; i < _processTable.rowCount; i++) {
+            for (int i = 0; i < _processTable.rowCount(); i++) {
               d1 += _processTable.getRawData(i, 5);
-              d2 += _processTable.getRawData(i, 6);
+              d2 += double.tryParse(_processTable.getRawData(i, 6)) ?? 0;
             }
             _totalpercent = 100 * (d2 / d1);
 
@@ -441,10 +433,11 @@ class TheTask extends App {
                   Divider(),
 
                   Container(
-                      padding: const EdgeInsets.all(10),
+                    color: Colors.indigo,
+                      padding: const EdgeInsets.all(5),
                       child: taskId == 0
                           ? TextButton(
-                              onPressed: _createTask, child: Text(tr("Create")))
+                              onPressed: _createTask, child: Text(tr("Create"), style: const TextStyle(color: Colors.white),))
                           : Row(
                               children: [
                                 Expanded(
@@ -490,12 +483,17 @@ class TheTask extends App {
                         },
                       ))),
 
+                  Row(children: [Expanded(child:
                   LinearPercentIndicator(
                     //leaner progress bar
                     animation: true,
                     animationDuration: 1000,
                     lineHeight: 20.0,
-                    percent: _totalpercent / 100,
+                    percent: (_totalpercent / 100.0).isNaN? 0 :_totalpercent / 100.0 ,
+
+                    linearStrokeCap: LinearStrokeCap.roundAll,
+                    progressColor: Colors.blue[400],
+                    backgroundColor: Colors.grey[300],
                     center: Text(
                       "${_totalpercent.toStringAsFixed(1)}%",
                       style: const TextStyle(
@@ -503,10 +501,7 @@ class TheTask extends App {
                           fontWeight: FontWeight.w600,
                           color: Colors.black),
                     ),
-                    linearStrokeCap: LinearStrokeCap.roundAll,
-                    progressColor: Colors.blue[400],
-                    backgroundColor: Colors.grey[300],
-                  ),
+                  ))]),
                   Expanded(child: _listOfProcesses()),
                 ],
               )));
@@ -522,7 +517,7 @@ class TheTask extends App {
     }
     Map<int, double> colw = {0: 0, 1: 100, 2: 200, 3: 0, 4: 50, 5: 50, 6: 50};
     List<DataColumn> columns = [];
-    for (int i = 0; i < _processTable.columnCount; i++) {
+    for (int i = 0; i < _processTable.columnCount(); i++) {
       DataColumn dataColumn = DataColumn(
           label: colw[i] == 0
               ? Container()
@@ -531,9 +526,9 @@ class TheTask extends App {
       columns.add(dataColumn);
     }
     List<DataRow> rows = [];
-    for (int i = 0; i < _processTable.rowCount; i++) {
+    for (int i = 0; i < _processTable.rowCount(); i++) {
       List<DataCell> cells = [];
-      for (int c = 0; c < _processTable.columnCount; c++) {
+      for (int c = 0; c < _processTable.columnCount(); c++) {
         DataCell dc = DataCell(colw[c] == 0
             ? Container()
             : Container(
@@ -590,7 +585,7 @@ class TheTask extends App {
       sd(tr("Input right quantity"));
       return;
     }
-    httpQuery('/engine/elinaworkshop/index.php',
+    httpQuery('rwcreatetask',
         AppStateTaskWindows(SocketMessage.op_create_task), {
       'action': 'rmwtasks',
       'actionid': SocketMessage.op_create_task,
@@ -602,7 +597,7 @@ class TheTask extends App {
   }
 
   void _loadTask(int id) {
-    httpQuery('engine/elinaworkshop/index.php',
+    httpQuery('rwloadtask',
         AppStateTaskWindows(SocketMessage.op_load_task), {
       'action': 'rwmftasks',
       'actionid': SocketMessage.op_load_task,

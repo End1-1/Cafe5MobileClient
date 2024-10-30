@@ -5,11 +5,17 @@ const datatype_double = 2;
 const datatype_string = 3;
 
 class NetworkTable {
-  int columnCount = 0;
-  int rowCount = 0;
+  int columnCount() {
+    return strings.length;
+  }
+
+  int rowCount() {
+    return data.length;
+  }
+
   int selectedIndex = -1;
   List<int> dataTypes = [];
-  List<List<dynamic>> data = [];
+  List<dynamic> data = [];
   int _stringsCount = 0;
   List<String> strings = [];
 
@@ -18,8 +24,6 @@ class NetworkTable {
   }
 
   void reset() {
-    columnCount = 0;
-    rowCount = 0;
     _stringsCount = 0;
     dataTypes.clear();
     data.clear();
@@ -27,16 +31,16 @@ class NetworkTable {
     selectedIndex = -1;
   }
 
-
-
-  void readDataTypes(SocketMessage m) {
-    for (int i = 0; i < columnCount; i++) {
-      dataTypes.add(m.getByte());
-    }
-  }
-
-  void readData(List<List<dynamic>> m) {
+  void readData(dynamic m) {
     data.clear();
+    strings.clear();
+    if (m == null) {
+      return;
+    }
+    if (m.isNotEmpty) {
+      Map<String, dynamic> f = m[0];
+      strings.addAll(f.keys);
+    }
     data.addAll(m);
   }
 
@@ -52,29 +56,18 @@ class NetworkTable {
   }
 
   bool isEmpty() {
-    return strings.length == 0;
+    return strings.isEmpty;
   }
 
   String getDisplayData(int r, int c) {
-    switch (dataTypes[c]) {
-      case datatype_int:
-        return data[r][c].toString();
-      case datatype_double:
-        return data[r][c].toString();
-      case datatype_string:
-        return strings[data[r][c]];
-    }
-    return "Unknown";
+    final key = strings[c];
+    final d = data[r][key];
+    return d.toString();
   }
 
   dynamic getRawData(int r, int c) {
-    switch (dataTypes[c]) {
-      case datatype_int:
-      case datatype_double:
-        return data[r][c];
-      case datatype_string:
-        return strings[data[r][c]];
-    }
-    return "Unknown raw";
+    final key = strings[c];
+    final d = data[r][key];
+    return d;
   }
 }

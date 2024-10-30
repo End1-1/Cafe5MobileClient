@@ -18,8 +18,8 @@ class TheWorkshops extends App {
   final _autoTextEditingController = TextEditingController();
   final _autoFocus = FocusNode();
   final _autoKey = GlobalKey();
-  late NetworkTable _tw;
-  late NetworkTable _td;
+  final NetworkTable _tw = NetworkTable();
+  final NetworkTable _td = NetworkTable();
 
   TheWorkshops({super.key});
 
@@ -27,15 +27,11 @@ class TheWorkshops extends App {
   void initState() {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      workshop.clear();
-      Db.query('workshop').then((map) {
-        List.generate(map.length, (i) {
-          ClassWorkshop p =
-              ClassWorkshop(id: map[i]['id'], name: map[i]["name"]);
-          workshop.add(p);
-        });
-      });
-    });
+      HttpQuery(route: 'rwlist').request({}).then((d) {
+        for (final e in d['data']['workshop']) {
+          workshop.add(ClassWorkshop(id: e['f_id'], name: e['f_name']));
+        }
+      });});
   }
 
   @override
@@ -125,9 +121,6 @@ class TheWorkshops extends App {
                         ),
                         onPressed: () {
                           _autoTextEditingController.clear();
-                   //NOPTIFY
-                            _td = NetworkTable();
-                            _tw = NetworkTable();
 
                         },
                       )),
@@ -164,7 +157,7 @@ class TheWorkshops extends App {
 
   List<Widget> _stages(int code) {
     List<int> rows = [];
-    for (int i = 0; i < _td.rowCount; i++) {
+    for (int i = 0; i < _td.rowCount(); i++) {
       if (_td.getRawData(i, 0) == code) {
         rows.add(i);
       }
@@ -330,7 +323,7 @@ class TheWorkshops extends App {
 
   List<Widget> _tl1s() {
     List<Widget> ls = [];
-    for (int i = 0; i < _tw.rowCount; i++) {
+    for (int i = 0; i < _tw.rowCount(); i++) {
       ls.add(_tl1(
           _tw.getDisplayData(i, 2),
           _tw.getDisplayData(i, 3),
