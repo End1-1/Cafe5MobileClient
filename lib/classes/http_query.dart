@@ -44,6 +44,8 @@ class HttpQuery {
     if (kDebugMode) {
       inData['debug'] = true;
     }
+    inData['app'] = 'workshop';
+    inData['appversion'] = Config.getString('appversion');
     String strBody = jsonEncode(inData..addAll({'sessionkey': prefs.getString('sessionkey') ?? ''}));
     if (kDebugMode) {
       print('route: /engine/elinaworkshop/$route.php');
